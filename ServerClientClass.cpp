@@ -162,7 +162,7 @@ void ServerClientClass::rec_threadRun() {
             printf(" ############# \n");
         } else {
 //            if ((index_paket % 100) == 0 || arbeits_paket_header->paket_id == (arbeits_paket_header->count_pakets_in_train - 1)) {
-            if ((arbeits_paket_header->paket_id == (arbeits_paket_header->count_pakets_in_train - 1)) {
+            if (arbeits_paket_header->paket_id == (arbeits_paket_header->count_pakets_in_train - 1)) {
                 printf("paket empfangen id: %d # ", arbeits_paket->header.paket_id);
                 printf("index_paket: %d # ", index_paket);
                 printf("count_pakets_in_train: %d # ", arbeits_paket->header.count_pakets_in_train);
@@ -207,7 +207,7 @@ void ServerClientClass::rec_threadRun() {
 
                 countBytes = sendto(client_mess_socket, arbeits_paket, mess_paket_size, 0, (struct sockaddr*) &clientAddr, clientAddrSize);
 
-                usleep(1000);
+                usleep(10000);
 
                 if (countBytes != mess_paket_size) {
                     printf("ERROR:\n  %ld Bytes gesendet (%s)\n", countBytes, strerror(errno));

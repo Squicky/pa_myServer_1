@@ -19,6 +19,9 @@ public:
     virtual ~ServerClientClass();
 
     int udp_rec_port;
+
+    static timespec timespec_diff_timespec(timespec start, timespec end);
+    static double timespec_diff_double(timespec start, timespec end);
 private:
     struct sockaddr_in clientAddr;
     struct sockaddr_in meineAddr;
@@ -34,8 +37,7 @@ private:
      */
     int mess_paket_size;
 
-    timespec timespec_diff_timespec(timespec start, timespec end);
-    double timespec_diff_double(timespec start, timespec end);
+
 };
 
 #endif	/* SERVERCLIENTCLASS_H */

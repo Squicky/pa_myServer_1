@@ -16,6 +16,7 @@
 #include <pthread.h>
 #include <list>
 #include <unistd.h>
+#include <time.h>
 
 ServerClass::ServerClass() {
     /*
@@ -76,6 +77,24 @@ void ServerClass::threadRun() {
 
     struct init_info_client_to_server info_c2s;
     struct init_info_server_to_client info_s2c;
+
+
+    struct timeval timeout_time;
+    timeout_time.tv_sec = 0;
+    timeout_time.tv_usec = 999999;
+    if (setsockopt(control_socket, SOL_SOCKET, SO_RCVTIMEO, (char *) &timeout_time, sizeof(timeout_time))) {
+        perror("setsockopt");
+    }
+    struct timespec t1;
+    struct timespec t2;
+
+    clock_gettime(CLOCK_REALTIME, &t1);
+    rc = recvfrom(control_socket, &info_c2s, sizeof (info_c2s), 0, (struct sockaddr *) &clientAddr, &clientAddrSize);
+    clock_gettime(CLOCK_REALTIME, &t2);
+    
+    double d = ServerClientClass::timespec_diff_double(t1, t2);
+    printf("d: %f    | rc: %ld \n", d, rc);
+
 
     /* Daten in While Schleife empfangen */
     printf("Control UDP Socket (CUS) (%s:%d) wartet auf Daten ... \n", inet_ntoa(meineAddr.sin_addr), ntohs(meineAddr.sin_port));
