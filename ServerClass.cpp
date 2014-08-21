@@ -50,6 +50,7 @@ void ServerClass::threadRun() {
     control_socket = socket(AF_INET, SOCK_DGRAM, 0); //  SOCK_DGRAM <-> UDP
     if (control_socket < 0) {
         printf("ERROR:\n  Kann Socket nicht oeffnen: \n(%s)\n", strerror(errno));
+        fflush(stdout);
         exit(EXIT_FAILURE);
     } else {
         printf("Control UDP Socket (CUS) erstellt :-) \n");
@@ -70,6 +71,7 @@ void ServerClass::threadRun() {
     rc = bind(control_socket, (struct sockaddr *) &meineAddr, sizeof (meineAddr));
     if (rc < 0) {
         printf("ERROR:\n  Port %d kann nicht an Control UDP Socket (CUS) gebunden werden:\n (%s)\n", LOCAL_Control_SERVER_PORT, strerror(errno));
+        fflush(stdout);
         exit(EXIT_FAILURE);
     } else {
         printf("Port %d an Control UDP Socket (CUS) gebunden :-) \n", LOCAL_Control_SERVER_PORT);
@@ -77,24 +79,6 @@ void ServerClass::threadRun() {
 
     struct init_info_client_to_server info_c2s;
     struct init_info_server_to_client info_s2c;
-
-
-    struct timeval timeout_time;
-    timeout_time.tv_sec = 0;
-    timeout_time.tv_usec = 999999;
-    if (setsockopt(control_socket, SOL_SOCKET, SO_RCVTIMEO, (char *) &timeout_time, sizeof(timeout_time))) {
-        perror("setsockopt");
-    }
-    struct timespec t1;
-    struct timespec t2;
-
-    clock_gettime(CLOCK_REALTIME, &t1);
-    rc = recvfrom(control_socket, &info_c2s, sizeof (info_c2s), 0, (struct sockaddr *) &clientAddr, &clientAddrSize);
-    clock_gettime(CLOCK_REALTIME, &t2);
-    
-    double d = ServerClientClass::timespec_diff_double(t1, t2);
-    printf("d: %f    | rc: %ld \n", d, rc);
-
 
     /* Daten in While Schleife empfangen */
     printf("Control UDP Socket (CUS) (%s:%d) wartet auf Daten ... \n", inet_ntoa(meineAddr.sin_addr), ntohs(meineAddr.sin_port));
@@ -128,6 +112,7 @@ void ServerClass::threadRun() {
 
             if (sc->udp_rec_port == 0) {
                 printf("ERROR:\n  Es konnte kein Port an UDP Mess-Socket (UMS) gebunden werden");
+                fflush(stdout);
                 exit(EXIT_FAILURE);
             }
         }

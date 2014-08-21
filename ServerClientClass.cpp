@@ -92,12 +92,17 @@ void ServerClientClass::rec_threadRun() {
     // Berechne Speichergröße für Array für Header eines ganzen Trains
     // bei max. UMTS Geschwindigkeit 
     // Da wir nur 500 ms lange senden wollen sollte das Array groß genug sein (fast doppelte Größe))
-    int paket_header_size = sizeof (paket_header);
-    int array_paket_header_size = max_umts_data_rate / mess_paket_size;
-    array_paket_header_size = array_paket_header_size * paket_header_size;
+    uint count_array_paket_header = max_umts_data_rate / mess_paket_size;
+    uint last_index_in_array_paket_header = count_array_paket_header - 1;
+    uint paket_header_size = sizeof (paket_header);
+    uint array_paket_header_size = count_array_paket_header * paket_header_size;
 
     struct paket_header *array_paket_header_recv = (paket_header*) malloc(array_paket_header_size);
     struct paket_header *array_paket_header_send = (paket_header*) malloc(array_paket_header_size);
+
+    uint array_paket_header_recv_start = (uint) array_paket_header_recv;
+    uint array_paket_header_recv_ende = array_paket_header_recv_start + array_paket_header_size - 1;
+
 
     int paket_size = sizeof (paket);
     struct paket *arbeits_paket = (struct paket *) malloc(paket_size);
@@ -133,10 +138,23 @@ void ServerClientClass::rec_threadRun() {
     int mess_paket_size_doppelt = 2 * mess_paket_size;
     //    lokalesPaket.count_pakets_in_train = lokalesPaket.recv_data_rate / mess_paket_size_doppelt;
 
+
+    // Timeout fuer recvfrom auf 1 Sek setzen     
+    struct timeval timeout_time;
+    timeout_time.tv_sec = 1;
+    timeout_time.tv_usec = 0;
+    if (setsockopt(client_mess_socket, SOL_SOCKET, SO_RCVTIMEO, (char *) &timeout_time, sizeof (timeout_time))) {
+        printf("ERROR:\n  Kann Timeout fuer UDP Mess-Socket (UMS) nicht setzen: \n(%s)\n", strerror(errno));
+        fflush(stdout);
+        exit(EXIT_FAILURE);
+    }
+
     long countBytes;
     int i;
 
     int index_paket = 0;
+    int count_ok_index_paket = 0;
+    
     /* Daten in While Schleife empfangen */
     printf("UDP Mess-Socket (UMS) (%s:%d) wartet auf Daten ... \n", inet_ntoa(meineAddr.sin_addr), ntohs(meineAddr.sin_port));
     int last_paket_id = -1;
@@ -153,7 +171,7 @@ void ServerClientClass::rec_threadRun() {
         countBytes = recvfrom(client_mess_socket, arbeits_paket, paket_size, 0, (struct sockaddr *) &clientAddr, &clientAddrSize);
         clock_gettime(CLOCK_REALTIME, &(arbeits_paket->header.recv_time));
         //        usleep(5000);
-        if ((last_paket_id + 1) != arbeits_paket->header.paket_id) {
+        if ((last_paket_id + 1) != index_paket) {
             printf("paket empfangen id: %d # ", arbeits_paket->header.paket_id);
             printf("index_paket: %d # ", index_paket);
             printf("count_pakets_in_train: %d # ", arbeits_paket->header.count_pakets_in_train);
@@ -161,7 +179,8 @@ void ServerClientClass::rec_threadRun() {
             printf("token: %d ", arbeits_paket->header.token);
             printf(" ############# \n");
         } else {
-//            if ((index_paket % 100) == 0 || arbeits_paket_header->paket_id == (arbeits_paket_header->count_pakets_in_train - 1)) {
+            count_ok_index_paket++;
+            //            if ((index_paket % 100) == 0 || arbeits_paket_header->paket_id == (arbeits_paket_header->count_pakets_in_train - 1)) {
             if (arbeits_paket_header->paket_id == (arbeits_paket_header->count_pakets_in_train - 1)) {
                 printf("paket empfangen id: %d # ", arbeits_paket->header.paket_id);
                 printf("index_paket: %d # ", index_paket);
@@ -178,15 +197,34 @@ void ServerClientClass::rec_threadRun() {
         }
 
         // Header des empfangenen Pakets in das Array sichern 
-        memcpy(&(array_paket_header_recv[index_paket]), arbeits_paket_header, paket_header_size);
+        uint ui = (uint) &(array_paket_header_recv[index_paket]);
+        if (array_paket_header_recv_start <= ui && ui <= (array_paket_header_recv_ende - paket_header_size)) {
+            memcpy(&(array_paket_header_recv[index_paket]), arbeits_paket_header, paket_header_size);
+        } else {
+            printf("Segmentation fault ? %u ### %d \n", ui, index_paket);
 
+            printf("paket empfangen id: %d # ", arbeits_paket->header.paket_id);
+            printf("index_paket: %d # ", index_paket);
+            printf("count_pakets_in_train: %d # ", arbeits_paket->header.count_pakets_in_train);
+            printf("countBytes: %ld # ", countBytes);
+            printf("token: %d ", arbeits_paket->header.token);
+            printf("  \n\n");
+
+            fflush(stdout);
+
+            int x = 4711;
+            x = (int) memcpy(&(array_paket_header_recv[index_paket]), arbeits_paket_header, paket_header_size);
+
+            printf("Segmentation fault ? %u ### %d ### %d \n\n", ui, index_paket, x);
+        }
+        
         // wenn leztes Paket vom Paket Train empfangen, dann Antwort Train senden
-        if (arbeits_paket_header->paket_id == (arbeits_paket_header->count_pakets_in_train - 1)) {
+        if (countBytes == -1 || arbeits_paket_header->paket_id == (arbeits_paket_header->count_pakets_in_train - 1)) {
 
             arbeits_paket_header->count_pakets_in_train = arbeits_paket_header->recv_data_rate / mess_paket_size_doppelt;
 
-            if (52000 < arbeits_paket_header->count_pakets_in_train) {
-                arbeits_paket_header->count_pakets_in_train = 52000;
+            if (last_index_in_array_paket_header < arbeits_paket_header->count_pakets_in_train) {
+                arbeits_paket_header->count_pakets_in_train = last_index_in_array_paket_header;
             }
 
             // berechne neue Empfangsrate
@@ -196,6 +234,7 @@ void ServerClientClass::rec_threadRun() {
             arbeits_paket_header->recv_data_rate = bytes_per_sek;
 
             printf("Last index_paket: %d # ", index_paket);
+            printf("paket empfangen id: %d # ", arbeits_paket->header.paket_id);
             printf("count_all_bytes: %f # ", count_all_bytes);
             printf("time_diff: %f # ", time_diff);
             printf("my new data_rate: %f \n", bytes_per_sek);
@@ -207,7 +246,7 @@ void ServerClientClass::rec_threadRun() {
 
                 countBytes = sendto(client_mess_socket, arbeits_paket, mess_paket_size, 0, (struct sockaddr*) &clientAddr, clientAddrSize);
 
-                usleep(10000);
+                //                usleep(1);
 
                 if (countBytes != mess_paket_size) {
                     printf("ERROR:\n  %ld Bytes gesendet (%s)\n", countBytes, strerror(errno));
@@ -215,6 +254,7 @@ void ServerClientClass::rec_threadRun() {
             }
 
             index_paket = -1;
+            count_ok_index_paket = 0;
             last_paket_id = -1;
         }
 
