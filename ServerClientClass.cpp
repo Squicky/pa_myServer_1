@@ -152,13 +152,13 @@ void ServerClientClass::rec_threadRun() {
     struct timeval timeout_time;
     timeout_time.tv_sec = 0;
     timeout_time.tv_usec = 10000;
-    
+
     if (setsockopt(client_mess_socket, SOL_SOCKET, SO_RCVTIMEO, (char *) &timeout_time, sizeof (timeout_time))) {
         printf("ERROR:\n  Kann Timeout fuer UDP Mess-Socket (UMS) nicht setzen: \n(%s)\n", strerror(errno));
         fflush(stdout);
         exit(EXIT_FAILURE);
     }
-     
+
 
     long countBytes;
     int i;
@@ -206,7 +206,7 @@ void ServerClientClass::rec_threadRun() {
         }
 
         if (countBytes == -1) {
-//            sleep(1);
+            //            sleep(1);
         } else {
 
             last_paket_id = arbeits_paket_header->paket_id;
@@ -214,9 +214,16 @@ void ServerClientClass::rec_threadRun() {
             if (my_max_recv_train_id < arbeits_paket_header->train_id) {
                 my_max_recv_train_id = arbeits_paket_header->train_id;
                 my_train_send_countid = arbeits_paket_header->train_send_countid;
+
+                printf("empfange # train_id %d  # countid: %d #  count pakete: %d\n", arbeits_paket_header->train_id, arbeits_paket_header->train_send_countid, arbeits_paket_header->count_pakets_in_train);
+
+                //                index_paket = 0;
             } else if (my_max_recv_train_id == arbeits_paket_header->train_id) {
                 if (my_train_send_countid < arbeits_paket_header->train_send_countid) {
                     my_train_send_countid = arbeits_paket_header->train_send_countid;
+
+                    printf("empfange # train_id %d  # countid: %d # count pakete: %d \n", arbeits_paket_header->train_id, arbeits_paket_header->train_send_countid, arbeits_paket_header->count_pakets_in_train);
+
                     index_paket = 0;
                 }
             }
@@ -307,11 +314,18 @@ void ServerClientClass::rec_threadRun() {
             printf("paket empfangen id: %d # ", arbeits_paket_header->paket_id);
             printf("count_all_bytes: %f # ", count_all_bytes);
             printf("time_diff: %f # ", time_diff);
-            printf("my new data_rate: %f \n", bytes_per_sek);
+            if (bytes_per_sek >= 1024 * 1024) {
+                printf("my new data_rate: %.2f MB / Sek \n", bytes_per_sek / (1024 * 1024));
+            } else if (bytes_per_sek >= 1024 * 1024) {
+                printf("my new data_rate: %.2f KB / Sek \n", bytes_per_sek / (1024));
+            } else {
+                printf("my new data_rate: %.2f B / Sek \n", bytes_per_sek);                
+            }
 
-            arbeits_paket_header->train_id = my_max_recv_train_id + 1;
 
-            if (my_last_send_train_id < arbeits_paket_header->train_id) {
+                arbeits_paket_header->train_id = my_max_recv_train_id + 1;
+
+                if (my_last_send_train_id < arbeits_paket_header->train_id) {
                 my_train_send_countid = 0;
             } else {
                 my_train_send_countid++;
@@ -319,14 +333,14 @@ void ServerClientClass::rec_threadRun() {
 
             arbeits_paket_header->train_send_countid = my_train_send_countid;
 
-            my_last_send_train_id = arbeits_paket_header->train_id;
+                    my_last_send_train_id = arbeits_paket_header->train_id;
 
-            printf("sende %d Pakete # train_id: %d\n", arbeits_paket_header->count_pakets_in_train, arbeits_paket_header->train_id);
+                    printf("sende %d Pakete # train_id: %d # send_countid: %d\n", arbeits_paket_header->count_pakets_in_train, arbeits_paket_header->train_id, my_train_send_countid);
             for (i = 0; i < arbeits_paket_header->count_pakets_in_train; i++) {
                 arbeits_paket_header->paket_id = i;
-                clock_gettime(CLOCK_REALTIME, &(arbeits_paket_header->send_time));
+                        clock_gettime(CLOCK_REALTIME, &(arbeits_paket_header->send_time));
 
-                countBytes = sendto(client_mess_socket, arbeits_paket, mess_paket_size, 0, (struct sockaddr*) &clientAddr, clientAddrSize);
+                        countBytes = sendto(client_mess_socket, arbeits_paket, mess_paket_size, 0, (struct sockaddr*) &clientAddr, clientAddrSize);
 
                 if (countBytes != mess_paket_size) {
                     printf("ERROR:\n  %ld Bytes gesendet (%s)\n", countBytes, strerror(errno));
@@ -335,11 +349,11 @@ void ServerClientClass::rec_threadRun() {
 
             if (my_max_train_id < my_last_send_train_id) {
                 my_max_train_id = my_last_send_train_id;
-                printf("my_max_train_id send: %d \n", my_max_train_id);
+                        printf("my_max_train_id send: %d \n", my_max_train_id);
             }
 
             index_paket = 0;
-            last_paket_id = 0;
+                    last_paket_id = 0;
 
 
 
@@ -353,6 +367,7 @@ void ServerClientClass::rec_threadRun() {
                     if (0 <= index_paket && index_paket <= last_index_in_array_paket_header) {
                         //
                     } else {
+
                         printf("Segmentation fault ? %u ### \n", index_paket);
                     }
 
@@ -386,10 +401,11 @@ timespec ServerClientClass::timespec_diff_timespec(timespec start, timespec end)
 
     if (end.tv_nsec < start.tv_nsec) {
         temp.tv_sec = end.tv_sec - start.tv_sec - 1;
-        temp.tv_nsec = 1000000000 + end.tv_nsec - start.tv_nsec;
+                temp.tv_nsec = 1000000000 + end.tv_nsec - start.tv_nsec;
     } else {
+
         temp.tv_sec = end.tv_sec - start.tv_sec;
-        temp.tv_nsec = end.tv_nsec - start.tv_nsec;
+                temp.tv_nsec = end.tv_nsec - start.tv_nsec;
     }
     return temp;
 }
@@ -397,10 +413,10 @@ timespec ServerClientClass::timespec_diff_timespec(timespec start, timespec end)
 double ServerClientClass::timespec_diff_double(timespec start, timespec end) {
     timespec temp = timespec_diff_timespec(start, end);
 
-    double temp2 = temp.tv_nsec;
-    double temp3 = 1000000000;
-    temp2 = temp2 / temp3;
-    temp3 = temp.tv_sec;
+            double temp2 = temp.tv_nsec;
+            double temp3 = 1000000000;
+            temp2 = temp2 / temp3;
+            temp3 = temp.tv_sec;
 
     return (temp2 + temp3);
 }
