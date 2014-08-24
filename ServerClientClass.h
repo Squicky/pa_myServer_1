@@ -15,9 +15,11 @@
 class ServerClientClass {
 public:
     ServerClientClass(int _paket_size);
+/*    
     ServerClientClass(const ServerClientClass& orig);
     virtual ~ServerClientClass();
-
+*/
+    
     int udp_rec_port;
 
     static timespec timespec_diff_timespec(timespec start, timespec end);
@@ -37,6 +39,7 @@ private:
      */
     int mess_paket_size;
 
+    bool stop;
 
 };
 
