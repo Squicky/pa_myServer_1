@@ -10,7 +10,8 @@
 
 #include <time.h>
 
-#define paket_puffer_size 2048
+#define SERVER_IP "192.168.120.241"
+
 
 struct init_info_client_to_server {
     int paket_size;

@@ -62,8 +62,14 @@ void ServerClass::threadRun() {
 
     // meineAddr konfigurieren: IPv4, Port, jeder Absender
     meineAddr.sin_family = AF_INET;
-    meineAddr.sin_addr.s_addr = htonl(INADDR_ANY);
     meineAddr.sin_port = htons(LOCAL_Control_SERVER_PORT);
+
+    //    meineAddr.sin_addr.s_addr = htonl(INADDR_ANY);   
+    if (6 < strlen(SERVER_IP) && strlen(SERVER_IP) < 16) {
+        meineAddr.sin_addr.s_addr = inet_addr(SERVER_IP);
+    } else {
+        meineAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    }
 
     long rc;
 
@@ -87,7 +93,8 @@ void ServerClass::threadRun() {
         // rc = Anzahl empfangener Bytes
         rc = recvfrom(control_socket, &info_c2s, sizeof (info_c2s), 0, (struct sockaddr *) &clientAddr, &clientAddrSize);
         //        cus_puffer[rc] = 0;
-        printf("CUS (%s:%d) hat %ld Bytes von Client (%s:%d) empfangen\n", inet_ntoa(meineAddr.sin_addr), ntohs(meineAddr.sin_port), rc, inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
+        printf("CUS (%s:%d) hat %ld Bytes ", inet_ntoa(meineAddr.sin_addr), ntohs(meineAddr.sin_port), rc);
+        printf("von Client (%s:%d) empfangen\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
         //        printf("  Daten: |%s|\n", cus_puffer);
 
         if (rc == sizeof (info_c2s)) {
@@ -107,7 +114,8 @@ void ServerClass::threadRun() {
             if (rc < 0) {
                 printf("ERROR:\n  %ld Bytes gesendet (%s)\n", rc, strerror(errno));
             }
-            printf("CUS (%s:%d) hat %ld Bytes an Client (%s:%d) gesendet\n", inet_ntoa(meineAddr.sin_addr), ntohs(meineAddr.sin_port), rc, inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
+            printf("CUS (%s:%d) hat %ld Bytes an ", inet_ntoa(meineAddr.sin_addr), ntohs(meineAddr.sin_port), rc);
+            printf("Client (%s:%d) gesendet\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
             //          printf("  Daten: |%s|\n", cus_puffer);
 
             if (sc->udp_rec_port == 0) {

@@ -37,7 +37,13 @@ ServerClientClass::ServerClientClass(int _paket_size) {
     // meineAddr konfigurieren: IPv4, Port, jeder Absender
     meineAddr.sin_family = AF_INET;
     meineAddr.sin_port = htons(udp_rec_port);
-    meineAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+
+    //    meineAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    if (6 < strlen(SERVER_IP) && strlen(SERVER_IP) < 16) {
+        meineAddr.sin_addr.s_addr = inet_addr(SERVER_IP);
+    } else {
+        meineAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    }
 
     long rc;
 
