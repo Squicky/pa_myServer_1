@@ -10,7 +10,7 @@
 
 #include <time.h>
 
-#define SERVER_IP "192.168.120.241"
+#define SERVER_IP "192.168.2.231"
 
 
 struct init_info_client_to_server {

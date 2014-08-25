@@ -58,11 +58,11 @@ LDLIBSOPTIONS=
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
-	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/myserver
+	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/pa_myserver_1
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/myserver: ${OBJECTFILES}
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/pa_myserver_1: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
-	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/myserver ${OBJECTFILES} ${LDLIBSOPTIONS}
+	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/pa_myserver_1 ${OBJECTFILES} ${LDLIBSOPTIONS}
 
 ${OBJECTDIR}/ServerClass.o: ServerClass.cpp 
 	${MKDIR} -p ${OBJECTDIR}
@@ -85,7 +85,7 @@ ${OBJECTDIR}/welcome.o: welcome.cc
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/myserver
+	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/pa_myserver_1
 
 # Subprojects
 .clean-subprojects:
