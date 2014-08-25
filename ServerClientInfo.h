@@ -21,10 +21,10 @@ struct init_info_server_to_client {
 };
 
 struct paket_header {
-    int token;
+//    int token;
     int train_id;
-    int paket_id;
     int train_send_countid;
+    int paket_id;
     int count_pakets_in_train;
     struct timespec recv_time;
     struct timespec send_time;
@@ -33,7 +33,7 @@ struct paket_header {
 
 struct paket {
     struct paket_header header;
-    char puffer[paket_puffer_size];
+    char *puffer;
 };
 
     /*
