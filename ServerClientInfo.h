@@ -39,7 +39,7 @@ sudo arp
 arp eintrag löschen
 sudo arp -d [IP]
 
-arp Eintrag hinzufügen
+arp Eintrag hinzufuegen
 sudo arp -s 192.168.220.236 FF:FF:FF:FF:FF:FF
 sudo arp -s 192.168.120.234 FF:FF:FF:FF:FF:FF
 
@@ -62,8 +62,8 @@ sudo iptraf
 
 #include <time.h>
 
-#define SERVER_IP "192.168.120.233"
-//#define SERVER_IP ""
+//#define SERVER_IP "192.168.120.233"
+#define SERVER_IP ""
 
 /*
     * max. UMTS Datenrate: HSPA+ 42 MBits/Sek
