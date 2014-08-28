@@ -44,7 +44,8 @@ sudo arp -s 192.168.220.236 FF:FF:FF:FF:FF:FF
 sudo arp -s 192.168.120.234 FF:FF:FF:FF:FF:FF
 
  * Netzwerkgeschwindigkeit setzen
-sudo ethtool -s eth0 speed 100 duplex full autoneg on 
+sudo ethtool -s eth0 speed 10 duplex full autoneg on 
+sudo ethtool -s eth1 speed 10 duplex full autoneg on 
 http://wiki.ubuntuusers.de/ethtool
  * 
 
@@ -62,6 +63,13 @@ sudo iptraf
 #include <time.h>
 
 #define SERVER_IP "192.168.120.233"
+//#define SERVER_IP ""
+
+/*
+    * max. UMTS Datenrate: HSPA+ 42 MBits/Sek
+    * 42 MBits/Sek = 42000000 Bits/Sek = 5250000 Bytes/Sek
+    */
+#define MAX_UMTS_DATA_RATE 5250000
 
 
 struct init_info_client_to_server {
@@ -92,7 +100,7 @@ struct paket {
     * max. UMTS Datenrate: HSPA+ 42 MBits/Sek
     * 42 MBits/Sek = 42000000 Bits/Sek = 5250000 Bytes/Sek
     */
-    static int max_umts_data_rate = 5250000; 
+    //static int max_umts_data_rate = 5250000; 
 
 #endif	/* SERVERCLIENTINFO_H */
 

@@ -4,6 +4,7 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>ListArrayClass.h</itemPath>
       <itemPath>ServerClass.h</itemPath>
       <itemPath>ServerClientClass.h</itemPath>
       <itemPath>ServerClientInfo.h</itemPath>
@@ -16,6 +17,7 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <itemPath>ListArrayClass.cpp</itemPath>
       <itemPath>ServerClass.cpp</itemPath>
       <itemPath>ServerClientClass.cpp</itemPath>
       <itemPath>welcome.cc</itemPath>
@@ -39,6 +41,10 @@
           <commandLine>-pthread</commandLine>
         </ccTool>
       </compileType>
+      <item path="ListArrayClass.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ListArrayClass.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="ServerClass.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="ServerClass.h" ex="false" tool="3" flavor2="0">
@@ -74,6 +80,10 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
+      <item path="ListArrayClass.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ListArrayClass.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="ServerClass.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="ServerClass.h" ex="false" tool="3" flavor2="0">

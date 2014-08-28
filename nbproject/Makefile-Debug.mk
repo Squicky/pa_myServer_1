@@ -35,6 +35,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/ListArrayClass.o \
 	${OBJECTDIR}/ServerClass.o \
 	${OBJECTDIR}/ServerClientClass.o \
 	${OBJECTDIR}/welcome.o
@@ -63,6 +64,11 @@ LDLIBSOPTIONS=
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/pa_myserver_1: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/pa_myserver_1 ${OBJECTFILES} ${LDLIBSOPTIONS}
+
+${OBJECTDIR}/ListArrayClass.o: ListArrayClass.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ListArrayClass.o ListArrayClass.cpp
 
 ${OBJECTDIR}/ServerClass.o: ServerClass.cpp 
 	${MKDIR} -p ${OBJECTDIR}
