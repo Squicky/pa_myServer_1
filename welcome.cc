@@ -37,19 +37,31 @@
 
 int main(int argc, char**argv) {
     // Prints welcome message...
-    std::cout << "Welcome ... \n" << std::endl;
+//    std::cout << "Welcome ... \n" << std::endl;
 
+    /*
+    printf("\033[8;5Hhello");
+    fflush(stdout);
+    printf("\033[3;2Hauto");
+    fflush(stdout);
+    printf("\033[4;3Hauto");
+    fflush(stdout);
+    printf("\033[5;1Hauto");
+    fflush(stdout);
+    printf("\033[0;0Hauto");
+    fflush(stdout);
+*/
     // Prints arguments...
-/*    if (argc > 1) {
-        std::cout << std::endl << "Arguments:" << std::endl;
-        for (int i = 1; i < argc; i++) {
-            std::cout << i << ": " << argv[i] << std::endl;
+    /*    if (argc > 1) {
+            std::cout << std::endl << "Arguments:" << std::endl;
+            for (int i = 1; i < argc; i++) {
+                std::cout << i << ": " << argv[i] << std::endl;
+            }
         }
-    }
- */
-    
+     */
+
     ServerClass *s = new ServerClass();
-    
+
     printf("\nmain EXIT_SUCCESS\n");
     return EXIT_SUCCESS;
 }
