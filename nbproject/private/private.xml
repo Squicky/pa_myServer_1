@@ -15,13 +15,13 @@
             <file>file:/home/user/NetBeansProjects74/myServer/ServerClass.h</file>
         </group>
         <group>
-            <file>file:/home/user/NetBeansProjects74/pa_myServer_1/ServerClass.cpp</file>
-            <file>file:/home/user/NetBeansProjects74/pa_myServer_1/ServerClientClass.cpp</file>
-            <file>file:/home/user/NetBeansProjects74/pa_myServer_1/ServerClientClass.h</file>
-            <file>file:/home/user/NetBeansProjects74/pa_myServer_1/ServerClientInfo.h</file>
-            <file>file:/home/user/NetBeansProjects74/pa_myServer_1/welcome.cc</file>
-            <file>file:/home/user/NetBeansProjects74/pa_myServer_1/ListArrayClass.cpp</file>
-            <file>file:/home/user/NetBeansProjects74/pa_myServer_1/ListArrayClass.h</file>
+            <file>file:/home/user/NetBeansProjects74/myServer/ServerClientClass.h</file>
+            <file>file:/home/user/NetBeansProjects74/myServer/ServerClass.cpp</file>
+            <file>file:/home/user/NetBeansProjects74/myServer/ServerClientClass.cpp</file>
+            <file>file:/home/user/NetBeansProjects74/myServer/ListArrayClass.cpp</file>
+            <file>file:/home/user/NetBeansProjects74/myServer/ListArrayClass.h</file>
+            <file>file:/home/user/NetBeansProjects74/myServer/ServerClientInfo.h</file>
+            <file>file:/home/user/NetBeansProjects74/myServer/ServerClass.h</file>
         </group>
     </open-files>
 </project-private>

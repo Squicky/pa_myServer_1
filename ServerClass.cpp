@@ -64,7 +64,7 @@ void ServerClass::threadRun() {
     meineAddr.sin_family = AF_INET;
     meineAddr.sin_port = htons(LOCAL_Control_SERVER_PORT);
 
-    //    meineAddr.sin_addr.s_addr = htonl(INADDR_ANY);   
+    //    meineAddr.sin_addr.s_addr = htonl(INADDR_ANY);
     if (6 < strlen(SERVER_IP) && strlen(SERVER_IP) < 16) {
         meineAddr.sin_addr.s_addr = inet_addr(SERVER_IP);
     } else {
@@ -76,11 +76,11 @@ void ServerClass::threadRun() {
     /* Lokalen Server Port bind(en) */
     rc = bind(control_socket, (struct sockaddr *) &meineAddr, sizeof (meineAddr));
     if (rc < 0) {
-        printf("ERROR:\n  Port %d kann nicht an Control UDP Socket (CUS) gebunden werden:\n (%s)\n", LOCAL_Control_SERVER_PORT, strerror(errno));
+        printf("ERROR:\n  IP %s und Port %d kann nicht an Control UDP Socket (CUS) gebunden werden:\n (%s)\n", inet_ntoa(meineAddr.sin_addr), LOCAL_Control_SERVER_PORT, strerror(errno));
         fflush(stdout);
         exit(EXIT_FAILURE);
     } else {
-        printf("Port %d an Control UDP Socket (CUS) gebunden :-) \n", LOCAL_Control_SERVER_PORT);
+        printf("IP %s und Port %d an Control UDP Socket (CUS) gebunden :-) \n", inet_ntoa(meineAddr.sin_addr), LOCAL_Control_SERVER_PORT);
     }
 
     struct init_info_client_to_server info_c2s;
@@ -103,8 +103,8 @@ void ServerClass::threadRun() {
             ServerClientList.push_back(sc);
 
             if (sc->udp_rec_port != 0) {
-                // Gib dem Empfangs-pthread 1/10 Sekunde Zeit
-                usleep(100000);
+                // Gib dem Empfangs-pthread 5/10 Sekunde Zeit
+                usleep(500000);
             }
 
             info_s2c.port = sc->udp_rec_port;
@@ -123,6 +123,8 @@ void ServerClass::threadRun() {
                 fflush(stdout);
                 exit(EXIT_FAILURE);
             }
+        } else {
+             sleep(1);
         }
 
     }
