@@ -14,12 +14,12 @@
 
 class ServerClientClass {
 public:
-    ServerClientClass(int _paket_size);
-/*    
-    ServerClientClass(const ServerClientClass& orig);
-    virtual ~ServerClientClass();
-*/
-    
+    ServerClientClass(int _paket_size, char _zeit_dateiname[]);
+    /*    
+        ServerClientClass(const ServerClientClass& orig);
+        virtual ~ServerClientClass();
+     */
+
     int udp_rec_port;
 
     static timespec timespec_diff_timespec(timespec start, timespec end);
@@ -41,6 +41,7 @@ private:
 
     bool stop;
 
+    char zeit_dateiname[16];
 };
 
 #endif	/* SERVERCLIENTCLASS_H */

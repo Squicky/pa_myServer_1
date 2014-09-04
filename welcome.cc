@@ -33,24 +33,21 @@
 #include <cstdlib>
 #include <cstdio>
 
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+#include <time.h>
+
+#include <string.h>
+
 #include "ServerClass.h"
 
 int main(int argc, char**argv) {
     // Prints welcome message...
-//    std::cout << "Welcome ... \n" << std::endl;
+    //    std::cout << "Welcome ... \n" << std::endl;
 
-    /*
-    printf("\033[8;5Hhello");
-    fflush(stdout);
-    printf("\033[3;2Hauto");
-    fflush(stdout);
-    printf("\033[4;3Hauto");
-    fflush(stdout);
-    printf("\033[5;1Hauto");
-    fflush(stdout);
-    printf("\033[0;0Hauto");
-    fflush(stdout);
-*/
     // Prints arguments...
     /*    if (argc > 1) {
             std::cout << std::endl << "Arguments:" << std::endl;
@@ -59,6 +56,38 @@ int main(int argc, char**argv) {
             }
         }
      */
+
+
+
+
+
+    // O_WRONLY nur zum Schreiben öffnen
+    // O_RDWR zum Lesen und Schreiben öffnen
+    // O_RDONLY nur zum Lesen öffnen
+    // O_CREAT Falls die Datei nicht existiert, wird sie neu angelegt. Falls die Datei existiert, ist O_CREAT ohne Wirkung.
+    // O_APPEND Datei öffnen zum Schreiben am Ende
+    // O_EXCL O_EXCL kombiniert mit O_CREAT bedeutet, dass die Datei nicht geöffnet werden kann, wenn sie bereits existiert und open() den Wert –1 zurückliefert (–1 == Fehler).
+    // O_TRUNC Eine Datei, die zum Schreiben geöffnet wird, wird geleert. Darauffolgendes Schreiben bewirkt erneutes Beschreiben der Datei von Anfang an. Die Attribute der Datei bleiben erhalten.
+    int File_Deskriptor;
+    char name[] = "test.txt";
+    if ((File_Deskriptor = open(name, O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU | S_IRWXG, S_IRWXO)) != -1) {
+
+        printf("Datei \"%s\" geöffnet \n ", name);
+
+        char puffer[] = "2inhalt1";
+        int bytezahl = strlen(puffer);
+
+        write(File_Deskriptor, puffer, bytezahl);
+
+        if ((close(File_Deskriptor)) != -1) {
+            printf("Datei \"%s\" geschlossen \n ", name);
+        } else {
+            printf("Fehler beim Schliessen der Datei\n");
+        }
+    } else {
+        printf("Fehler beim Öffnen der Datei \"%s\" \n ", name);
+    }
+
 
     ServerClass *s = new ServerClass();
 

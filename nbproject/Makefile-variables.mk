@@ -9,19 +9,19 @@ CND_DISTDIR=dist
 # Debug configuration
 CND_PLATFORM_Debug=GNU-Linux-x86
 CND_ARTIFACT_DIR_Debug=dist/Debug/GNU-Linux-x86
-CND_ARTIFACT_NAME_Debug=myserver
-CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux-x86/myserver
+CND_ARTIFACT_NAME_Debug=pa_myserver_1
+CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux-x86/pa_myserver_1
 CND_PACKAGE_DIR_Debug=dist/Debug/GNU-Linux-x86/package
-CND_PACKAGE_NAME_Debug=myserver.tar
-CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux-x86/package/myserver.tar
+CND_PACKAGE_NAME_Debug=pamyserver1.tar
+CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux-x86/package/pamyserver1.tar
 # Release configuration
 CND_PLATFORM_Release=GNU-Linux-x86
 CND_ARTIFACT_DIR_Release=dist/Release/GNU-Linux-x86
-CND_ARTIFACT_NAME_Release=myserver
-CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux-x86/myserver
+CND_ARTIFACT_NAME_Release=pa_myserver_1
+CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux-x86/pa_myserver_1
 CND_PACKAGE_DIR_Release=dist/Release/GNU-Linux-x86/package
-CND_PACKAGE_NAME_Release=myserver.tar
-CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux-x86/package/myserver.tar
+CND_PACKAGE_NAME_Release=pamyserver1.tar
+CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux-x86/package/pamyserver1.tar
 #
 # include compiler specific variables
 #

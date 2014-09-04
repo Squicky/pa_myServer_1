@@ -99,7 +99,7 @@ void ServerClass::threadRun() {
 
         if (rc == sizeof (info_c2s)) {
 
-            ServerClientClass *sc = new ServerClientClass(info_c2s.paket_size);
+            ServerClientClass *sc = new ServerClientClass(info_c2s.paket_size, info_c2s.zeit_dateiname);
             ServerClientList.push_back(sc);
 
             if (sc->udp_rec_port != 0) {

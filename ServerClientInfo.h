@@ -73,6 +73,7 @@ sudo iptraf
 
 struct init_info_client_to_server {
     int paket_size;
+    char zeit_dateiname[16];
 };
 
 struct init_info_server_to_client {
