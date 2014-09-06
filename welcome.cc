@@ -57,38 +57,6 @@ int main(int argc, char**argv) {
         }
      */
 
-
-
-
-
-    // O_WRONLY nur zum Schreiben öffnen
-    // O_RDWR zum Lesen und Schreiben öffnen
-    // O_RDONLY nur zum Lesen öffnen
-    // O_CREAT Falls die Datei nicht existiert, wird sie neu angelegt. Falls die Datei existiert, ist O_CREAT ohne Wirkung.
-    // O_APPEND Datei öffnen zum Schreiben am Ende
-    // O_EXCL O_EXCL kombiniert mit O_CREAT bedeutet, dass die Datei nicht geöffnet werden kann, wenn sie bereits existiert und open() den Wert –1 zurückliefert (–1 == Fehler).
-    // O_TRUNC Eine Datei, die zum Schreiben geöffnet wird, wird geleert. Darauffolgendes Schreiben bewirkt erneutes Beschreiben der Datei von Anfang an. Die Attribute der Datei bleiben erhalten.
-    int File_Deskriptor;
-    char name[] = "test.txt";
-    if ((File_Deskriptor = open(name, O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU | S_IRWXG, S_IRWXO)) != -1) {
-
-        printf("Datei \"%s\" geöffnet \n ", name);
-
-        char puffer[] = "2inhalt1";
-        int bytezahl = strlen(puffer);
-
-        write(File_Deskriptor, puffer, bytezahl);
-
-        if ((close(File_Deskriptor)) != -1) {
-            printf("Datei \"%s\" geschlossen \n ", name);
-        } else {
-            printf("Fehler beim Schliessen der Datei\n");
-        }
-    } else {
-        printf("Fehler beim Öffnen der Datei \"%s\" \n ", name);
-    }
-
-
     ServerClass *s = new ServerClass();
 
     printf("\nmain EXIT_SUCCESS\n");

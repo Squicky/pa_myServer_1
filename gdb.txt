@@ -1,0 +1,19 @@
+g++ -pthread   -c -g -MMD -MP -MF "ListArrayClass.o.d" -o ListArrayClass.o ListArrayClass.cpp
+
+g++ -pthread   -c -g -MMD -MP -MF "ServerClientClass.o.d" -o ServerClientClass.o ServerClientClass.cpp
+
+g++ -pthread   -c -g -MMD -MP -MF "ServerClass.o.d" -o ServerClass.o ServerClass.cpp
+
+g++ -pthread   -c -g -MMD -MP -MF "welcome.o.d" -o welcome.o welcome.cc
+
+g++ -pthread    -o myserver ListArrayClass.o ServerClientClass.o ServerClass.o welcome.o
+
+ulimit -c unlimited
+
+./myserver 
+
+gdb myserver core 
+
+--> (GDB) bt
+
+

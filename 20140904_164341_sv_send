@@ -1,7 +1,0 @@
-train_id;train_send_countid;paket_id;count_pakets_in_train;recv_time;send_time;recv_data_rate;recv_timeout_wait;last_recv_train_id;last_recv_train_send_countid;last_recv_paket_id
-
-
-1;0;0;4;0.0;1409841821.567282127;1614907;0;0;0;3
-1;0;1;4;0.0;1409841821.567311600;1614907;0;0;0;3
-1;0;2;4;0.0;1409841821.567317188;1614907;0;0;0;3
-1;0;3;4;0.0;1409841821.567322915;1614907;0;0;0;3

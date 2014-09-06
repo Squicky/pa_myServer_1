@@ -78,6 +78,7 @@ struct init_info_client_to_server {
 
 struct init_info_server_to_client {
     int port;
+    bool log_files_ok;
 };
 
 struct paket_header {

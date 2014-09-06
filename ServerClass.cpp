@@ -103,11 +103,14 @@ void ServerClass::threadRun() {
             ServerClientList.push_back(sc);
 
             if (sc->udp_rec_port != 0) {
-                // Gib dem Empfangs-pthread 5/10 Sekunde Zeit
-                usleep(500000);
+                // Gib dem Empfangs-pthread 1 Sekunde Zeit
+//                usleep(500000);
+                sleep(1);
             }
 
             info_s2c.port = sc->udp_rec_port;
+            
+            info_s2c.log_files_ok = sc->log_files_ok;
 
             rc = sendto(control_socket, &info_s2c, sizeof (info_s2c), 0, (struct sockaddr*) &clientAddr, clientAddrSize);
             //            cus_puffer[rc] = 0;
@@ -119,9 +122,13 @@ void ServerClass::threadRun() {
             //          printf("  Daten: |%s|\n", cus_puffer);
 
             if (sc->udp_rec_port == 0) {
-                printf("ERROR:\n  Es konnte kein Port an UDP Mess-Socket (UMS) gebunden werden");
+                printf("ERROR:\n  Es konnte kein Port an UDP Mess-Socket (UMS) gebunden werden\n");
                 fflush(stdout);
                 exit(EXIT_FAILURE);
+            } else if (sc->log_files_ok == false) {
+                printf("ERROR:\n  Log Files sind nicht OK\n");
+                fflush(stdout);
+                exit(EXIT_FAILURE);                
             }
         } else {
              sleep(1);

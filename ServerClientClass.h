@@ -24,6 +24,8 @@ public:
 
     static timespec timespec_diff_timespec(timespec start, timespec end);
     static double timespec_diff_double(timespec start, timespec end);
+    
+    bool log_files_ok;
 private:
     struct sockaddr_in clientAddr;
     struct sockaddr_in meineAddr;
@@ -41,7 +43,7 @@ private:
 
     bool stop;
 
-    char zeit_dateiname[16];
+    char zeit_dateiname[255];
 };
 
 #endif	/* SERVERCLIENTCLASS_H */
