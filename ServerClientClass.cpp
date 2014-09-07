@@ -163,7 +163,7 @@ void ServerClientClass::rec_threadRun() {
     // Timeout fuer recvfrom auf 1 Sek setzen     
     struct timeval timeout_time;
     timeout_time.tv_sec = 0; // Anzahl Sekunden
-    timeout_time.tv_usec = 300000; // Anzahl Mikrosekunden : 1 Sek. = 1.000.000 Mikrosekunden
+    timeout_time.tv_usec = 100000; // Anzahl Mikrosekunden : 1 Sek. = 1.000.000 Mikrosekunden
 
     long countBytes;
     int i;
@@ -183,10 +183,6 @@ void ServerClientClass::rec_threadRun() {
     /* Daten in While Schleife empfangen */
     printf("UDP Mess-Socket (UMS) (%s:%d) wartet auf Daten ... \n", inet_ntoa(meineAddr.sin_addr), ntohs(meineAddr.sin_port));
     while (stop == false) {
-
-        timespec a, b;
-
-        clock_gettime(CLOCK_REALTIME, &a);
 
         countBytes = recvfrom(client_mess_socket, arbeits_paket_recv, paket_size, 0, (struct sockaddr *) &clientAddr, &clientAddrSize);
 
@@ -286,7 +282,12 @@ void ServerClientClass::rec_threadRun() {
         if (
                 (countBytes == -1)
                 ||
-                (arbeits_paket_header_recv->paket_id == (arbeits_paket_header_recv->count_pakets_in_train - 1))
+                ( 
+                  my_max_recv_train_id == arbeits_paket_header_recv->train_id
+                  && my_recv_train_send_countid == arbeits_paket_header_recv->train_send_countid
+                  && arbeits_paket_header_recv->paket_id == (arbeits_paket_header_recv->count_pakets_in_train - 1)
+                )
+//                arbeits_paket_header_recv->paket_id == (arbeits_paket_header_recv->count_pakets_in_train - 1))
                 ) {
 
             arbeits_paket_header_send->count_pakets_in_train = arbeits_paket_header_recv->recv_data_rate / mess_paket_size_doppelt;
@@ -304,7 +305,7 @@ void ServerClientClass::rec_threadRun() {
 
             if (1 < lac_recv->count_paket_headers) {
 
-                time_diff = timespec_diff_double(lac_recv->first_paket_header->recv_time, lac_recv->last_paket_header->recv_time);
+                time_diff = timespec_diff_double(&lac_recv->first_paket_header->recv_time, &lac_recv->last_paket_header->recv_time);
 
                 if (time_diff <= 0) {
                     printf("ERROR:\n  time_diff <= 0 \n");
@@ -314,14 +315,15 @@ void ServerClientClass::rec_threadRun() {
 
                 count_all_bytes = lac_recv->count_paket_headers * mess_paket_size;
                 bytes_per_sek = count_all_bytes / time_diff;
+
+                int my_bits_per_sek = 8 * bytes_per_sek;
+                if (30000000 < my_bits_per_sek) {
+                    i = 2;
+                }
+
                 my_bytes_per_sek = bytes_per_sek;
             } else {
                 my_bytes_per_sek = mess_paket_size * 6;
-            }
-
-            int my_bits_per_sek = 8 * my_bytes_per_sek;
-            if (30000000 < my_bits_per_sek) {
-                i = 2;
             }
 
             arbeits_paket_header_send->recv_data_rate = my_bytes_per_sek;
@@ -339,7 +341,7 @@ void ServerClientClass::rec_threadRun() {
             printf("train send countid : %d # ", arbeits_paket_header_recv->train_send_countid);
             printf("paket id: %d # ", arbeits_paket_header_recv->paket_id);
             printf("count in t: %d # ", arbeits_paket_header_recv->count_pakets_in_train);
-            printf("recv %.2f %% # ", (double) ((double) lac_recv->count_paket_headers / (double) arbeits_paket_header_send->count_pakets_in_train) * 100.0);
+            printf("recv %.2f %% # ", (double) ((double) lac_recv->count_paket_headers / (double) arbeits_paket_header_recv->count_pakets_in_train) * 100.0);
             printf("time_diff: %.2f # ", time_diff);
             if (bytes_per_sek >= 1024 * 1024) {
                 printf("data_rate: %.2f MB / Sek        ", bytes_per_sek / (1024 * 1024));
@@ -378,7 +380,10 @@ void ServerClientClass::rec_threadRun() {
             printf("sende %d Pakete # train_id: %d # send_countid: %d       ", arbeits_paket_header_send->count_pakets_in_train, arbeits_paket_header_send->train_id, arbeits_paket_header_send->train_send_countid);
             printf("\033[19;0H");
             fflush(stdout);
+
+            timespec x_timespec;
             for (i = 0; i < arbeits_paket_header_send->count_pakets_in_train; i++) {
+
                 arbeits_paket_header_send->paket_id = i;
                 clock_gettime(CLOCK_REALTIME, &(arbeits_paket_header_send->send_time));
 
@@ -391,27 +396,49 @@ void ServerClientClass::rec_threadRun() {
                 } else {
                     lac_send3->copy_paket_header(arbeits_paket_header_send);
                 }
+                
+                // Wenn Paket Train über 0,5 Sekunden gesendet wird, dann Paket Train kürzen
+                x_timespec = timespec_diff_timespec(&lac_send3->first_paket_header->send_time, &arbeits_paket_header_send->send_time);
+                if (500000000 < x_timespec.tv_nsec) {
+                    arbeits_paket_header_send->count_pakets_in_train = i + 2;
+                }
+
             }
 
+            timespec *b = &(lac_send3->first_paket_header->send_time);
+            timespec *c = &(lac_send3->last_paket_header->send_time);
+            struct timespec a = timespec_diff_timespec(b, c);
+            if (a.tv_sec == 0) {
+
+                timeout_time.tv_sec = 0;
+                timeout_time.tv_usec = 1000000 - (a.tv_nsec / 1000);
+
+                if (setsockopt(client_mess_socket, SOL_SOCKET, SO_RCVTIMEO, (char *) &timeout_time, sizeof (timeout_time))) {
+                    printf("ERROR:\n  Kann Timeout fuer UDP Mess-Socket (UMS) nicht setzen: \n(%s)\n", strerror(errno));
+                    fflush(stdout);
+                    exit(EXIT_FAILURE);
+                }
+                
+            }
 
             if (0 < lac_recv->count_paket_headers) {
                 struct paket_header *x;
 
                 if (lac_send1 == lac_send3) {
                     x = lac_send2->give_paket_header(lac_recv->first_paket_header->last_recv_train_id, lac_recv->first_paket_header->last_recv_train_send_countid, lac_recv->first_paket_header->last_recv_paket_id);
-//                    lac_send2->save_to_file_and_clear();
+                    //                    lac_send2->save_to_file_and_clear();
                     lac_send2->clear();
                     lac_send3 = lac_send2;
                 } else {
                     x = lac_send1->give_paket_header(lac_recv->first_paket_header->last_recv_train_id, lac_recv->first_paket_header->last_recv_train_send_countid, lac_recv->first_paket_header->last_recv_paket_id);
-//                    lac_send1->save_to_file_and_clear();
+                    //                    lac_send1->save_to_file_and_clear();
                     lac_send1->clear();
                     lac_send3 = lac_send1;
                 }
 
                 if (x != NULL) {
 
-                    double t = timespec_diff_double(x->send_time, lac_recv->first_paket_header->recv_time);
+                    double t = timespec_diff_double(&x->send_time, &lac_recv->first_paket_header->recv_time);
 
                     printf("\033[11;0H  \033[12;0H  \033[13;0H  \033[14;0H  \033[15;0H  \033[16;0H  \033[17;0H  \033[18;0H  \033[19;0H  ");
                     printf("\033[18;0H# ");
@@ -435,7 +462,8 @@ void ServerClientClass::rec_threadRun() {
                 }
             }
 
-            lac_recv->save_to_file_and_clear();
+            //            lac_recv->save_to_file_and_clear();
+            lac_recv->clear();
 
         }
 
@@ -456,21 +484,20 @@ void ServerClientClass::rec_threadRun() {
  * 1 Sek =     1.000.000 Mikrosekunden 
  * 1 Sek = 1.000.000.000 Nanosekunden 
  */
-timespec ServerClientClass::timespec_diff_timespec(timespec start, timespec end) {
+timespec ServerClientClass::timespec_diff_timespec(timespec *start, timespec *end) {
     timespec temp;
 
-    if (end.tv_nsec < start.tv_nsec) {
-        temp.tv_sec = end.tv_sec - start.tv_sec - 1;
-        temp.tv_nsec = 1000000000 + end.tv_nsec - start.tv_nsec;
+    if (end->tv_nsec < start->tv_nsec) {
+        temp.tv_sec = end->tv_sec - start->tv_sec - 1;
+        temp.tv_nsec = 1000000000 + end->tv_nsec - start->tv_nsec;
     } else {
-
-        temp.tv_sec = end.tv_sec - start.tv_sec;
-        temp.tv_nsec = end.tv_nsec - start.tv_nsec;
+        temp.tv_sec = end->tv_sec - start->tv_sec;
+        temp.tv_nsec = end->tv_nsec - start->tv_nsec;
     }
     return temp;
 }
 
-double ServerClientClass::timespec_diff_double(timespec start, timespec end) {
+double ServerClientClass::timespec_diff_double(timespec *start, timespec *end) {
     timespec temp = timespec_diff_timespec(start, end);
 
     double temp2 = temp.tv_nsec;

@@ -59,6 +59,6 @@ int main(int argc, char**argv) {
 
     ServerClass *s = new ServerClass();
 
-    printf("\nmain EXIT_SUCCESS\n");
+    printf("\n main EXIT_SUCCESS \n");
     return EXIT_SUCCESS;
 }

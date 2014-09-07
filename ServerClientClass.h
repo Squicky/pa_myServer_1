@@ -22,8 +22,8 @@ public:
 
     int udp_rec_port;
 
-    static timespec timespec_diff_timespec(timespec start, timespec end);
-    static double timespec_diff_double(timespec start, timespec end);
+    static timespec timespec_diff_timespec(timespec *start, timespec *end);
+    static double timespec_diff_double(timespec *start, timespec *end);
     
     bool log_files_ok;
 private:
