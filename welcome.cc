@@ -44,6 +44,19 @@
 
 #include "ServerClass.h"
 
+timespec timespec_diff_timespec(timespec *start, timespec *end) {
+    timespec temp;
+
+    if (end->tv_nsec < start->tv_nsec) {
+        temp.tv_sec = end->tv_sec - start->tv_sec - 1;
+        temp.tv_nsec = 1000000000 + end->tv_nsec - start->tv_nsec;
+    } else {
+        temp.tv_sec = end->tv_sec - start->tv_sec;
+        temp.tv_nsec = end->tv_nsec - start->tv_nsec;
+    }
+    return temp;
+}
+
 int main(int argc, char**argv) {
     // Prints welcome message...
     //    std::cout << "Welcome ... \n" << std::endl;
@@ -57,6 +70,42 @@ int main(int argc, char**argv) {
         }
      */
 
+    /*
+    timespec a, b, c, d, e, f, g;
+    timespec *pa = &a;
+    timespec *pb = &b;
+    timespec *pc = &c;
+    timespec *pd = &d;
+    timespec *pe = &e;
+    timespec *pf = &f;
+    timespec *pg = &g;
+
+    clock_gettime(CLOCK_REALTIME, pa);
+    clock_gettime(CLOCK_REALTIME, pb);
+    clock_gettime(CLOCK_REALTIME, pc);
+    clock_gettime(CLOCK_REALTIME, pd);
+    
+    usleep(1000);
+    clock_gettime(CLOCK_REALTIME, pe);
+    usleep(1000);
+    clock_gettime(CLOCK_REALTIME, pf);
+    usleep(1000);
+    clock_gettime(CLOCK_REALTIME, pg);
+
+    timespec x = timespec_diff_timespec(pa, pb);
+    printf(" a - b: %ld,%.9ld  # %.9f\n", x.tv_sec, x.tv_nsec, (double) x.tv_nsec / 1000000000.0);
+    x = timespec_diff_timespec(pb, pc);
+    printf(" b - c: %ld,%.9ld  # %.9f \n", x.tv_sec, x.tv_nsec, (double) x.tv_nsec / 1000000000.0);
+    x = timespec_diff_timespec(pc, pd);
+    printf(" c - d: %ld,%.9ld  # %.9f \n", x.tv_sec, x.tv_nsec, (double) x.tv_nsec / 1000000000.0);
+    x = timespec_diff_timespec(pd, pe);
+    printf(" d - e: %ld,%.9ld  # %.9f \n", x.tv_sec, x.tv_nsec, (double) x.tv_nsec / 1000000000.0);
+    x = timespec_diff_timespec(pe, pf);
+    printf(" e - f: %ld,%.9ld  # %.9f \n", x.tv_sec, x.tv_nsec, (double) x.tv_nsec / 1000000000.0);
+    x = timespec_diff_timespec(pf, pg);
+    printf(" f - g: %ld,%.9ld  # %.9f \n", x.tv_sec, x.tv_nsec, (double) x.tv_nsec / 1000000000.0);
+*/
+    
     ServerClass *s = new ServerClass();
 
     printf("\n main EXIT_SUCCESS \n");

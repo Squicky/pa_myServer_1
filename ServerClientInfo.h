@@ -62,8 +62,8 @@ sudo iptraf
 
 #include <time.h>
 
-//#define SERVER_IP "192.168.120.233"
-#define SERVER_IP ""
+#define SERVER_IP "192.168.120.233"
+//#define SERVER_IP ""
 
 /*
  * max. UMTS Datenrate: HSPA+ 42 MBits/Sek
