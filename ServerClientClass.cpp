@@ -174,7 +174,7 @@ void ServerClientClass::rec_threadRun() {
     int my_max_recv_train_id = -1;
     int my_max_send_train_id = -3;
     int my_max_train_id = -2;
-    int my_bytes_per_sek = 64;
+    int my_bytes_per_sek = START_RECV_DATA_RATE / 8;
 
     int set_timeout = 0;
 
@@ -360,10 +360,10 @@ void ServerClientClass::rec_threadRun() {
                 printf("recv %.4f %% # ", (double) ((double) lac_recv->count_paket_headers / (double) arbeits_paket_header_recv->count_pakets_in_train) * 100.0);
             }
             printf("time_diff: %.4f # ", time_diff_recv);
-            double mbits_per_sek_recv = bytes_per_sek_recv / 8;
+            double mbits_per_sek_recv = bytes_per_sek_recv * 8;
             mbits_per_sek_recv = mbits_per_sek_recv / 1000000;
             printf("data_rate: %.4f MBits/Sek        ", mbits_per_sek_recv);
-            
+
             printf("\033[19;0H");
             fflush(stdout);
 
@@ -423,7 +423,7 @@ void ServerClientClass::rec_threadRun() {
                         count_all_bytes_send = i * mess_paket_size;
                         time_diff_send = (double) x_timespec.tv_nsec / 1000000000.0;
                         bytes_per_sek_send = count_all_bytes_send / time_diff_send;
-                        double max_send_faktor = 1.1;
+                        double max_send_faktor = 1.7;
                         if ((max_send_faktor * arbeits_paket_header_recv->recv_data_rate) < bytes_per_sek_send) {
                             double soll_send_time = count_all_bytes_send / (max_send_faktor * arbeits_paket_header_recv->recv_data_rate);
 
@@ -431,18 +431,18 @@ void ServerClientClass::rec_threadRun() {
 
                             int sleep_time_microsec = 1000000 * sleep_time;
 
-//                            printf("\r gg: %d | %d #", i, sleep_time_microsec);
-//                            fflush(stdout);
+                            //                            printf("\r gg: %d | %d #", i, sleep_time_microsec);
+                            //                            fflush(stdout);
 
                             if (sleep_time_microsec < 0 || 1000000 < sleep_time_microsec) {
                                 sleep_time_microsec++;
                                 sleep_time_microsec--;
                             }
-                            
+
                             usleep(sleep_time_microsec);
 
-//                            printf(" hh: %d #", i);
-//                            fflush(stdout);
+                            //                            printf(" hh: %d #", i);
+                            //                            fflush(stdout);
 
                             send_sleep_total = send_sleep_total + sleep_time_microsec;
                             send_sleep_count++;
@@ -474,10 +474,10 @@ void ServerClientClass::rec_threadRun() {
                     arbeits_paket_header_send->train_id,
                     arbeits_paket_header_send->train_send_countid,
                     (double) x_timespec.tv_nsec / 1000000000.0,
-                    (double) timeout_time.tv_usec / 1000000.0, 
+                    (double) timeout_time.tv_usec / 1000000.0,
                     send_sleep_count,
                     send_sleep_total);
-            
+
             printf("\033[19;0H");
             fflush(stdout);
 
