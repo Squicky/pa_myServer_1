@@ -70,7 +70,7 @@ int main(int argc, char**argv) {
         }
      */
 
-    /*
+/*
     timespec a, b, c, d, e, f, g;
     timespec *pa = &a;
     timespec *pb = &b;
@@ -84,7 +84,7 @@ int main(int argc, char**argv) {
     clock_gettime(CLOCK_REALTIME, pb);
     clock_gettime(CLOCK_REALTIME, pc);
     clock_gettime(CLOCK_REALTIME, pd);
-    
+
     usleep(1000);
     clock_gettime(CLOCK_REALTIME, pe);
     usleep(1000);
@@ -105,7 +105,7 @@ int main(int argc, char**argv) {
     x = timespec_diff_timespec(pf, pg);
     printf(" f - g: %ld,%.9ld  # %.9f \n", x.tv_sec, x.tv_nsec, (double) x.tv_nsec / 1000000000.0);
 */
-    
+
     ServerClass *s = new ServerClass();
 
     printf("\n main EXIT_SUCCESS \n");

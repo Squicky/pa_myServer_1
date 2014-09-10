@@ -104,12 +104,12 @@ void ServerClass::threadRun() {
 
             if (sc->udp_rec_port != 0) {
                 // Gib dem Empfangs-pthread 1 Sekunde Zeit
-//                usleep(500000);
+                //                usleep(500000);
                 sleep(1);
             }
 
             info_s2c.port = sc->udp_rec_port;
-            
+
             info_s2c.log_files_ok = sc->log_files_ok;
 
             rc = sendto(control_socket, &info_s2c, sizeof (info_s2c), 0, (struct sockaddr*) &clientAddr, clientAddrSize);
@@ -128,10 +128,10 @@ void ServerClass::threadRun() {
             } else if (sc->log_files_ok == false) {
                 printf("ERROR:\n  Log Files sind nicht OK\n");
                 fflush(stdout);
-                exit(EXIT_FAILURE);                
+                exit(EXIT_FAILURE);
             }
         } else {
-             sleep(1);
+            sleep(1);
         }
 
     }

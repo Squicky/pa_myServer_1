@@ -42,6 +42,8 @@ private:
     int mess_paket_size;
     int paket_header_size;
     char filename[256];
+    
+    
 };
 
 #endif	/* LISTARRAYCLASS_H */

@@ -41,6 +41,8 @@ ListArrayClass::ListArrayClass(int _mess_paket_size, char *_filename) {
     mess_paket_size = _mess_paket_size;
     count_arrays = 1;
     count_paket_headers = 0;
+    
+    File_Deskriptor = 0;
 
     strncpy(filename, _filename, strlen(_filename));
 

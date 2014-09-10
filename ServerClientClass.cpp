@@ -23,7 +23,7 @@ ServerClientClass::ServerClientClass(int _paket_size, char _zeit_dateiname[]) {
     log_files_ok = false;
 
     zeit_dateiname[0] = 0;
-    strncat(zeit_dateiname, "/home/user/pa_log_data/", sizeof (zeit_dateiname));
+    strncat(zeit_dateiname, "../../log_data/", sizeof (zeit_dateiname));
     strncat(zeit_dateiname, _zeit_dateiname, sizeof (zeit_dateiname));
     //    memcpy(zeit_dateiname, _zeit_dateiname, sizeof (zeit_dateiname));
 
@@ -360,13 +360,10 @@ void ServerClientClass::rec_threadRun() {
                 printf("recv %.4f %% # ", (double) ((double) lac_recv->count_paket_headers / (double) arbeits_paket_header_recv->count_pakets_in_train) * 100.0);
             }
             printf("time_diff: %.4f # ", time_diff_recv);
-            if (bytes_per_sek_recv >= 1024 * 1024) {
-                printf("data_rate: %.4f MB / Sek        ", bytes_per_sek_recv / (1024 * 1024));
-            } else if (bytes_per_sek_recv >= 1024) {
-                printf("data_rate: %.4f KB / Sek        ", bytes_per_sek_recv / (1024));
-            } else {
-                printf("data_rate: %.4f B / Sek        ", bytes_per_sek_recv);
-            }
+            double mbits_per_sek_recv = bytes_per_sek_recv / 8;
+            mbits_per_sek_recv = mbits_per_sek_recv / 1000000;
+            printf("data_rate: %.4f MBits/Sek        ", mbits_per_sek_recv);
+            
             printf("\033[19;0H");
             fflush(stdout);
 
@@ -425,19 +422,31 @@ void ServerClientClass::rec_threadRun() {
                         // sonst sleep
                         count_all_bytes_send = i * mess_paket_size;
                         time_diff_send = (double) x_timespec.tv_nsec / 1000000000.0;
-                        bytes_per_sek_send = count_all_bytes_recv / time_diff_send;
-                        if ((2 * arbeits_paket_header_recv->recv_data_rate) < bytes_per_sek_send) {
-                            double soll_send_time = count_all_bytes_send / (2 * arbeits_paket_header_recv->recv_data_rate);
+                        bytes_per_sek_send = count_all_bytes_send / time_diff_send;
+                        double max_send_faktor = 1.1;
+                        if ((max_send_faktor * arbeits_paket_header_recv->recv_data_rate) < bytes_per_sek_send) {
+                            double soll_send_time = count_all_bytes_send / (max_send_faktor * arbeits_paket_header_recv->recv_data_rate);
 
                             double sleep_time = soll_send_time - time_diff_send;
 
                             int sleep_time_microsec = 1000000 * sleep_time;
+
+//                            printf("\r gg: %d | %d #", i, sleep_time_microsec);
+//                            fflush(stdout);
+
+                            if (sleep_time_microsec < 0 || 1000000 < sleep_time_microsec) {
+                                sleep_time_microsec++;
+                                sleep_time_microsec--;
+                            }
+                            
                             usleep(sleep_time_microsec);
+
+//                            printf(" hh: %d #", i);
+//                            fflush(stdout);
 
                             send_sleep_total = send_sleep_total + sleep_time_microsec;
                             send_sleep_count++;
                         }
-
                     }
                 }
             }
@@ -460,12 +469,15 @@ void ServerClientClass::rec_threadRun() {
 
             printf("\033[11;0H  \033[12;0H  \033[13;0H  \033[14;0H  \033[15;0H  \033[16;0H  \033[17;0H  \033[18;0H  \033[19;0H  ");
             printf("\033[16;0H# ");
-            printf("gesende %d Pakete # train_id: %d # send_countid: %d       # sendTime: %.5f  # RecvTimeout. %.5f  ",
+            printf("gesende %d Pakete # train_id: %d # send_countid: %d # sendTime: %.5f # RecvTimeout. %.5f # sleep: %ld | %ld ",
                     arbeits_paket_header_send->count_pakets_in_train,
                     arbeits_paket_header_send->train_id,
                     arbeits_paket_header_send->train_send_countid,
                     (double) x_timespec.tv_nsec / 1000000000.0,
-                    (double) timeout_time.tv_usec / 1000000.0);
+                    (double) timeout_time.tv_usec / 1000000.0, 
+                    send_sleep_count,
+                    send_sleep_total);
+            
             printf("\033[19;0H");
             fflush(stdout);
 
