@@ -43,6 +43,7 @@
 #include <string.h>
 
 #include "ServerClass.h"
+#include "ServerClientInfo.h"
 
 timespec timespec_diff_timespec(timespec *start, timespec *end) {
     timespec temp;
@@ -105,7 +106,27 @@ int main(int argc, char**argv) {
     x = timespec_diff_timespec(pf, pg);
     printf(" f - g: %ld,%.9ld  # %.9f \n", x.tv_sec, x.tv_nsec, (double) x.tv_nsec / 1000000000.0);
 */
-
+    
+    int size_int = sizeof(int);
+    int size_double = sizeof(double);
+    int size_timespec =sizeof(timespec);
+    
+    int size_paket_header = sizeof(paket_header);
+    
+    paket_header ph;
+    
+    int size_count_pakets_in_train = sizeof(ph.count_pakets_in_train);
+    int size_recv_time = sizeof(ph.recv_time);
+    
+    long int longint;
+    int size_longint = sizeof (longint);
+            
+    struct timespec ts;
+    
+    int size_tstv_sec = sizeof(ts.tv_sec);
+    int size_tstv_nsec = sizeof(ts.tv_nsec);
+    
+    
     ServerClass *s = new ServerClass();
 
     printf("\n main EXIT_SUCCESS \n");
