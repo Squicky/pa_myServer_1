@@ -214,8 +214,9 @@ void ServerClientClass::rec_threadRun() {
             if (last_sec_recv != 0) {
                 if (120 < (arbeits_paket_header_recv->recv_time.tv_sec - last_sec_recv)) {
                     stop = true;
-                    printf("ERROR:\n  120 Sekunden nichts empfangen \n");
+                    printf("ERROR:\n  %d Sekunden nichts empfangen \n, arbeits_paket_header_recv->recv_time.tv_sec");
                     fflush(stdout);
+                    continue;
                 }
             }
 
