@@ -435,8 +435,8 @@ void ServerClientClass::rec_threadRun() {
                         time_diff_send = (double) train_sending_time.tv_nsec / 1000000000.0;
                         bytes_per_sek_send = count_all_bytes_send / time_diff_send;
 
-                        //double max_send_faktor = 1.175;
-                        double max_send_faktor = 1.0;
+                        double max_send_faktor = 1.175;
+                        //double max_send_faktor = 1.0;
 
                         if ((max_send_faktor * arbeits_paket_header_recv->recv_data_rate) < bytes_per_sek_send) {
                             double soll_send_time = count_all_bytes_send / (max_send_faktor * arbeits_paket_header_recv->recv_data_rate);
