@@ -74,11 +74,11 @@ ListArrayClass::ListArrayClass(int _mess_paket_size, char *_filename) {
     // O_TRUNC Eine Datei, die zum Schreiben geoeffnet wird, wird geleert. Darauffolgendes Schreiben bewirkt erneutes Beschreiben der Datei von Anfang an. Die Attribute der Datei bleiben erhalten.
     File_Deskriptor = open(filename, O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU | S_IRWXG, S_IRWXO);
     if (File_Deskriptor == -1) {
-        printf("ERROR:\n  Fehler beim oeffnen / Erstellen der Datei \"%s\" \n(%s)\n ", filename, strerror(errno));
+        printf("ERROR:\n  Fehler beim oeffnen / Erstellen der Datei \"%s\" \n(%s)\n", filename, strerror(errno));
         fflush(stdout);
         exit(EXIT_FAILURE);
     }
-    printf("Datei \"%s\" erstellt & geoeffnet \n ", filename);
+    printf("Datei \"%s\" erstellt & geoeffnet \n", filename);
 
     char firstlines[] = "train_id;train_send_countid;paket_id;count_pakets_in_train;recv_data_rate;recv_timeout_wait;last_recv_train_id;last_recv_train_send_countid;last_recv_paket_id;recv_time;send_time\n\n\n";
     int firstlines_len = strlen(firstlines);
@@ -86,28 +86,27 @@ ListArrayClass::ListArrayClass(int _mess_paket_size, char *_filename) {
     /*
     file_csv = fopen(filename_csv, "w");
     if (file_csv == NULL) {
-        printf("ERROR:\n  Fehler beim oeffnen / Erstellen der Datei \"%s\" \n(%s)\n ", filename_csv, strerror(errno));
+        printf("ERROR:\n  Fehler beim oeffnen / Erstellen der Datei \"%s\" \n(%s)\n", filename_csv, strerror(errno));
         fflush(stdout);
         exit(EXIT_FAILURE);
     }
-    printf("Datei \"%s\" erstellt & geoeffnet \n ", filename);
+    printf("Datei \"%s\" erstellt & geoeffnet \n", filename);
      * */
 
     if (write(File_Deskriptor, firstlines, firstlines_len) != firstlines_len) {
-        printf("ERROR:\n  Fehler beim Schreiben der Datei \"%s\" \n(%s)\n ", filename, strerror(errno));
+        printf("ERROR:\n  Fehler beim Schreiben der Datei \"%s\" \n(%s)\n", filename, strerror(errno));
         fflush(stdout);
         exit(EXIT_FAILURE);
     }
 
     if (file_csv != NULL) {
         if (fprintf(file_csv, "%s", firstlines) != firstlines_len) {
-            printf("ERROR:\n  Fehler beim Schreiben der Datei \"%s\" \n(%s)\n ", filename_csv, strerror(errno));
+            printf("ERROR:\n  Fehler beim Schreiben der Datei \"%s\" \n(%s)\n", filename_csv, strerror(errno));
             fflush(stdout);
             exit(EXIT_FAILURE);
         }
         fflush(file_csv);
     }
-
 
     log_file_ok = true;
 
@@ -121,7 +120,6 @@ ListArrayClass::~ListArrayClass() {
     if (file_csv != NULL) {
         fclose(file_csv);
     }
-
 
     free(array_paket_header);
     array_paket_header = NULL;
@@ -222,10 +220,9 @@ void ListArrayClass::save_to_file_and_clear() {
                 }
             }
 
-
             int bytezahl = min * lac->paket_header_size;
             if (bytezahl != write(File_Deskriptor, lac->array_paket_header, bytezahl)) {
-                printf("ERROR:\n  Fehler beim Schreiben der Datei \"%s\" \n(%s)\n ", filename, strerror(errno));
+                printf("ERROR:\n  Fehler beim Schreiben der Datei \"%s\" \n(%s)\n", filename, strerror(errno));
                 fflush(stdout);
                 exit(EXIT_FAILURE);
             }
@@ -291,5 +288,4 @@ paket_header *ListArrayClass::give_paket_header(int train_id, int train_send_cou
 
     return NULL;
 }
-
 

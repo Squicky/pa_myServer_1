@@ -15,17 +15,17 @@
 class ServerClientClass {
 public:
     ServerClientClass(int _paket_size, char _zeit_dateiname[]);
-    /*    
-        ServerClientClass(const ServerClientClass& orig);
-        virtual ~ServerClientClass();
-     */
+    //ServerClientClass(const ServerClientClass& orig);
+    //virtual ~ServerClientClass();
+
 
     int udp_rec_port;
 
     static timespec timespec_diff_timespec(timespec *start, timespec *end);
     static double timespec_diff_double(timespec *start, timespec *end);
-    
+
     bool log_files_ok;
+    bool in_while_schleife;
 private:
     struct sockaddr_in clientAddr;
     struct sockaddr_in meineAddr;
@@ -36,9 +36,6 @@ private:
     static void * rec_threadStart(void * vdata);
     void rec_threadRun();
 
-    /*
-     * Paketgröße = Paket Header (36 Bytes) + Dummy Daten
-     */
     int mess_paket_size;
 
     bool stop;

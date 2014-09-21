@@ -103,9 +103,12 @@ void ServerClass::threadRun() {
             ServerClientList.push_back(sc);
 
             if (sc->udp_rec_port != 0) {
-                // Gib dem Empfangs-pthread 1 Sekunde Zeit
-                //                usleep(500000);
-                sleep(1);
+                // Gib dem Empfangs-pthread 120 Sekunde Zeit
+                int i = 0;
+                while (sc->in_while_schleife == false && i < 120) {
+                    sleep(1);
+                    i++;
+                }
             }
 
             info_s2c.port = sc->udp_rec_port;
@@ -113,13 +116,12 @@ void ServerClass::threadRun() {
             info_s2c.log_files_ok = sc->log_files_ok;
 
             rc = sendto(control_socket, &info_s2c, sizeof (info_s2c), 0, (struct sockaddr*) &clientAddr, clientAddrSize);
-            //            cus_puffer[rc] = 0;
+
             if (rc < 0) {
                 printf("ERROR:\n  %ld Bytes gesendet (%s)\n", rc, strerror(errno));
             }
             printf("CUS (%s:%d) hat %ld Bytes an ", inet_ntoa(meineAddr.sin_addr), ntohs(meineAddr.sin_port), rc);
             printf("Client (%s:%d) gesendet\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
-            //          printf("  Daten: |%s|\n", cus_puffer);
 
             if (sc->udp_rec_port == 0) {
                 printf("ERROR:\n  Es konnte kein Port an UDP Mess-Socket (UMS) gebunden werden\n");
