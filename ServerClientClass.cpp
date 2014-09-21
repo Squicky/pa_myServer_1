@@ -129,8 +129,8 @@ void ServerClientClass::rec_threadRun() {
     ListArrayClass *lac_send1 = new ListArrayClass(mess_paket_size, puffer);
     ListArrayClass *lac_send2 = new ListArrayClass(mess_paket_size);
     lac_send2->File_Deskriptor = lac_send1->File_Deskriptor;
-    lac_send2->File_Deskriptor_csv = lac_send1->File_Deskriptor_csv;
-    lac_send2->file = lac_send1->file;
+//    lac_send2->File_Deskriptor_csv = lac_send1->File_Deskriptor_csv;
+//    lac_send2->file = lac_send1->file;
     lac_send2->file_csv = lac_send1->file_csv;
     ListArrayClass *lac_send3 = lac_send1;
 
@@ -193,7 +193,7 @@ void ServerClientClass::rec_threadRun() {
         countBytes = recvfrom(client_mess_socket, arbeits_paket_recv, paket_size, 0, (struct sockaddr *) &clientAddr, &clientAddrSize);
 
         clock_gettime(CLOCK_REALTIME, &(arbeits_paket_header_recv->recv_time));
-
+        
         if (set_timeout == 0) {
             set_timeout = 1;
             if (setsockopt(client_mess_socket, SOL_SOCKET, SO_RCVTIMEO, (char *) &timeout_time, sizeof (timeout_time))) {
@@ -286,7 +286,7 @@ void ServerClientClass::rec_threadRun() {
         }
 
 
-        // wenn leztes Paket vom Paket Train empfangen, dann Antwort Train senden
+        // wenn leztes Paket (oder Recv-Timeout) vom Paket Train empfangen, dann Antwort Train senden
         if (
                 (countBytes == -1)
                 ||
@@ -317,7 +317,6 @@ void ServerClientClass::rec_threadRun() {
             long send_sleep_total = 0;
             long send_sleep_count = 0;
 
-
             if (1 < lac_recv->count_paket_headers) {
 
                 time_diff_recv = timespec_diff_double(&lac_recv->first_paket_header->recv_time, &lac_recv->last_paket_header->recv_time);
@@ -335,9 +334,12 @@ void ServerClientClass::rec_threadRun() {
                 my_bytes_per_sek = mess_paket_size * 6;
             }
 
-            if (1000000 < bytes_per_sek_send) {
-                bytes_per_sek_send = 1000000;
+            /*
+             * Datenrate bremsen :-)
+            if (100000 < my_bytes_per_sek) {
+                my_bytes_per_sek = 100000;
             }
+             * */
 
             arbeits_paket_header_send->recv_data_rate = my_bytes_per_sek;
 
@@ -544,6 +546,9 @@ void ServerClientClass::rec_threadRun() {
     }
 
     delete (lac_recv);
+    delete (lac_send1);
+    delete (lac_send2);
+    
     delete (arbeits_paket_recv);
     delete (arbeits_paket_send);
 }
