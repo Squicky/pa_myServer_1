@@ -69,10 +69,24 @@ sudo iptraf
  * max. UMTS Datenrate: HSPA+ 42 MBits/Sek
  * 42 MBits/Sek = 42000000 Bits/Sek = 5250000 Bytes/Sek
  */
-#define MAX_UMTS_DATA_RATE 115250000
+#define MAX_UMTS_DATA_RATE 5250000
 
+#define START_RECV_DATA_RATE 64000 //64 kBits
 
-#define START_RECV_DATA_RATE 64000 * 10
+/*
+ * Ethernet HEADER: 26 Byte (http://wiki.wireshark.org/Ethernet)
+ * - 8 Bytes Preamble
+ * - 6 Byte Ziel MAC
+ * - 6 Byte Absender MAC
+ * - 2 Type/Length (0x8000 IP)
+ * - 4 Byte CRC
+ * 
+ * IP Header: 20 Bytes
+ *
+ * UDP Header: 8 Bytes
+ */
+#define HEADER_SIZES 54
+
 
 struct init_info_client_to_server {
     int paket_size;
@@ -85,19 +99,21 @@ struct init_info_server_to_client {
 };
 
 struct paket_header {
-    //    int token;
     int train_id;
-    int train_send_countid;
+    int retransfer_train_id;
     int paket_id;
     int count_pakets_in_train;
     int recv_data_rate; // Bytes per Sek
 
-    int recv_timeout_wait;
-
     int last_recv_train_id;
     int last_recv_train_send_countid;
     int last_recv_paket_id;
+    
+    int last_paket_recv_bytes;
 
+    int timeout_time_tv_sec;
+    int timeout_time_tv_usec;
+    
     struct timespec recv_time;
     struct timespec send_time;
 };

@@ -80,7 +80,7 @@ ListArrayClass::ListArrayClass(int _mess_paket_size, char *_filename) {
     }
     printf("Datei \"%s\" erstellt & geoeffnet \n", filename);
 
-    char firstlines[] = "train_id;train_send_countid;paket_id;count_pakets_in_train;recv_data_rate;recv_timeout_wait;last_recv_train_id;last_recv_train_send_countid;last_recv_paket_id;recv_time;send_time\n\n\n";
+    char firstlines[] = "train_id;retransfer_train_id;paket_id;count_pakets_in_train;recv_data_rate;last_recv_train_id;last_recv_train_send_countid;last_recv_paket_id;last_paket_recv_bytes;timeout_time_tv_sec;timeout_time_tv_usec;recv_time;send_time\n\n\n";
     int firstlines_len = strlen(firstlines);
 
     /*
@@ -202,16 +202,18 @@ void ListArrayClass::save_to_file_and_clear() {
                     timespec2str(timestr1, timestr_size, &lac->array_paket_header[i].recv_time);
                     timespec2str(timestr2, timestr_size, &lac->array_paket_header[i].send_time);
 
-                    fprintf(file_csv, "%d;%d;%d;%d;%d;%d;%d;%d;%d;%s;%s\n",
+                    fprintf(file_csv, "%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%s;%s\n",
                             lac->array_paket_header[i].train_id,
-                            lac->array_paket_header[i].train_send_countid,
+                            lac->array_paket_header[i].retransfer_train_id,
                             lac->array_paket_header[i].paket_id,
-                            lac->array_paket_header[i].count_pakets_in_train,
+                            lac->array_paket_header[i].retransfer_train_id,
                             lac->array_paket_header[i].recv_data_rate,
-                            lac->array_paket_header[i].recv_timeout_wait,
                             lac->array_paket_header[i].last_recv_train_id,
                             lac->array_paket_header[i].last_recv_train_send_countid,
                             lac->array_paket_header[i].last_recv_paket_id,
+                            lac->array_paket_header[i].last_paket_recv_bytes,
+                            lac->array_paket_header[i].timeout_time_tv_sec,
+                            lac->array_paket_header[i].timeout_time_tv_usec,                            
                             timestr1,
                             timestr2
                             );
@@ -275,7 +277,7 @@ paket_header *ListArrayClass::give_paket_header(int train_id, int train_send_cou
 
     for (i = 0; i < count_paket_header_in_this_array; i++) {
         if (array_paket_header[i].train_id == train_id &&
-                array_paket_header[i].train_send_countid == train_send_countid &&
+                array_paket_header[i].retransfer_train_id == train_send_countid &&
                 array_paket_header[i].paket_id == paket_id) {
 
             return &array_paket_header[i];
