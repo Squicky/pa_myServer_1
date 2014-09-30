@@ -32,7 +32,6 @@ ListArrayClass::ListArrayClass(int _mess_paket_size) {
     int array_paket_header_size = count_paket_header_in_one_array * paket_header_size;
 
     array_paket_header = (paket_header*) malloc(array_paket_header_size);
-
     log_file_ok = false;
 }
 
@@ -80,7 +79,7 @@ ListArrayClass::ListArrayClass(int _mess_paket_size, char *_filename) {
     }
     printf("Datei \"%s\" erstellt & geoeffnet \n", filename);
 
-    char firstlines[] = "train_id;retransfer_train_id;paket_id;count_pakets_in_train;recv_data_rate;last_recv_train_id;last_recv_train_send_countid;last_recv_paket_id;last_recv_paket_bytes;timeout_time_tv_sec;timeout_time_tv_usec;recv_time;send_time;rtt\n\n\n";
+    char firstlines[] = "train_id;retransfer_train_id;paket_id;count_pakets_in_train;recv_data_rate;last_recv_train_id;last_recv_retransfer_train_id;last_recv_paket_id;last_recv_paket_bytes;timeout_time_tv_sec;timeout_time_tv_usec;recv_time;send_time;rtt\n\n\n";
     int firstlines_len = strlen(firstlines);
 
     /*
@@ -206,7 +205,7 @@ void ListArrayClass::save_to_file_and_clear() {
                     timespec2str(timestr1, timestr_size, &lac->array_paket_header[i].recv_time);
                     timespec2str(timestr2, timestr_size, &lac->array_paket_header[i].send_time);
 
-                    fprintf(file_csv, "%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%s;%s\n",
+                    fprintf(file_csv, "%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%s;%s;%f\n",
                             lac->array_paket_header[i].train_id,
                             lac->array_paket_header[i].retransfer_train_id,
                             lac->array_paket_header[i].paket_id,
@@ -219,7 +218,8 @@ void ListArrayClass::save_to_file_and_clear() {
                             lac->array_paket_header[i].timeout_time_tv_sec,
                             lac->array_paket_header[i].timeout_time_tv_usec,
                             timestr1,
-                            timestr2
+                            timestr2,
+                            lac->array_paket_header[i].rtt
                             );
 
                     fflush(file_csv);

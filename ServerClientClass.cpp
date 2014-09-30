@@ -163,8 +163,8 @@ void ServerClientClass::rec_threadRun() {
     arbeits_paket_header_recv->timeout_time_tv_usec = -1;
     arbeits_paket_header_send->last_recv_paket_bytes = -2;
     arbeits_paket_header_recv->last_recv_paket_bytes = -2;
-    arbeits_paket_header_send->rrt = -2;
-    arbeits_paket_header_recv->rrt = -2;
+    arbeits_paket_header_send->rtt = -2;
+    arbeits_paket_header_recv->rtt = -2;
 
     // Es soll nur 1/2 Sek gesendet werden
     int mess_paket_size_doppelt = 2 * mess_paket_size;
@@ -196,7 +196,7 @@ void ServerClientClass::rec_threadRun() {
 
     uint count_recv_Timeout = 0;
 
-    bool bremsen = false;
+    bool bremsen = true;
 
     /* Daten in While Schleife empfangen */
     printf("UDP Mess-Socket (UMS) (%s:%d) wartet auf Daten ... \n", inet_ntoa(meineAddr.sin_addr), ntohs(meineAddr.sin_port));
@@ -388,7 +388,8 @@ void ServerClientClass::rec_threadRun() {
             printf("time_diff: %.4f # ", time_diff_recv);
             double mbits_per_sek_recv = bytes_per_sek_recv * 8;
             mbits_per_sek_recv = mbits_per_sek_recv / 1000000;
-            printf("data_rate: %.4f MBits/Sek        ", mbits_per_sek_recv);
+            printf("data_rate: %.4f # ", mbits_per_sek_recv);
+            printf("%.4f MBits/Sek   ", (double) arbeits_paket_header_recv->recv_data_rate * 8 / 1000000);
             printf("\033[%d;0H", log_zeile + 8);
             fflush(stdout);
 
@@ -413,11 +414,11 @@ void ServerClientClass::rec_threadRun() {
             printf("\033[%d;0H  \033[%d;0H  \033[%d;0H  \033[%d;0H  \033[%d;0H  \033[%d;0H  \033[%d;0H  \033[%d;0H  \033[%d;0H  ",
                     log_zeile, log_zeile + 1, log_zeile + 2, log_zeile + 3, log_zeile + 4, log_zeile + 5, log_zeile + 6, log_zeile + 7, log_zeile + 8);
             printf("\033[%d;0H# ", log_zeile + 5);
-            printf("  sende  %d Pakete # train_id: %d # send_countid: %d                                       ### ", arbeits_paket_header_send->count_pakets_in_train, arbeits_paket_header_send->train_id, arbeits_paket_header_send->retransfer_train_id);
+            printf("  sende  %d Pakete # train_id: %d # retransfer_train_id: %d                                       ### ", arbeits_paket_header_send->count_pakets_in_train, arbeits_paket_header_send->train_id, arbeits_paket_header_send->retransfer_train_id);
             printf("\033[%d;0H", log_zeile + 8);
             fflush(stdout);
 
-            // rrt in ersten recv Packet eintraken
+            // rtt in ersten recv Packet eintraken
             {
                 struct paket_header *x = NULL;
                 if (0 < lac_recv->count_paket_headers) {
@@ -428,9 +429,9 @@ void ServerClientClass::rec_threadRun() {
                 }
 
                 if (x != NULL) {
-                    arbeits_paket_header_send->rrt = timespec_diff_double(&x->send_time, &lac_recv->first_paket_header->recv_time);
+                    arbeits_paket_header_send->rtt = timespec_diff_double(&x->send_time, &lac_recv->first_paket_header->recv_time);
                 } else {
-                    arbeits_paket_header_send->rrt = -1;
+                    arbeits_paket_header_send->rtt = -1;
                 }
             }
 
@@ -535,7 +536,7 @@ void ServerClientClass::rec_threadRun() {
             printf("\033[%d;0H  \033[%d;0H  \033[%d;0H  \033[%d;0H  \033[%d;0H  \033[%d;0H  \033[%d;0H  \033[%d;0H  \033[%d;0H  ",
                     log_zeile, log_zeile + 1, log_zeile + 2, log_zeile + 3, log_zeile + 4, log_zeile + 5, log_zeile + 6, log_zeile + 7, log_zeile + 8);
             printf("\033[%d;0H# ", log_zeile + 5);
-            printf("gesendet %d Pakete # train_id: %d # send_countid: %d # sendTime: %.5f # RecvTimeout. %ld,%.6ld # sleep: %ld | %ld          ",
+            printf("gesendet %d Pakete # train_id: %d # send_count: %d # sendTime: %.5f # RecvTimeout. %ld,%.6ld # sleep: %ld | %ld          ",
                     arbeits_paket_header_send->count_pakets_in_train,
                     arbeits_paket_header_send->train_id,
                     arbeits_paket_header_send->retransfer_train_id,
