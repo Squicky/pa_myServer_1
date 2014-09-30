@@ -161,8 +161,10 @@ void ServerClientClass::rec_threadRun() {
     arbeits_paket_header_send->timeout_time_tv_usec = -1;
     arbeits_paket_header_recv->timeout_time_tv_sec = -1;
     arbeits_paket_header_recv->timeout_time_tv_usec = -1;
-    arbeits_paket_header_send->last_paket_recv_bytes = -1;
-    arbeits_paket_header_recv->last_paket_recv_bytes = -1;
+    arbeits_paket_header_send->last_recv_paket_bytes = -2;
+    arbeits_paket_header_recv->last_recv_paket_bytes = -2;
+    arbeits_paket_header_send->rrt = -2;
+    arbeits_paket_header_recv->rrt = -2;
 
     // Es soll nur 1/2 Sek gesendet werden
     int mess_paket_size_doppelt = 2 * mess_paket_size;
@@ -194,6 +196,8 @@ void ServerClientClass::rec_threadRun() {
 
     uint count_recv_Timeout = 0;
 
+    bool bremsen = false;
+
     /* Daten in While Schleife empfangen */
     printf("UDP Mess-Socket (UMS) (%s:%d) wartet auf Daten ... \n", inet_ntoa(meineAddr.sin_addr), ntohs(meineAddr.sin_port));
     while (stop == false) {
@@ -201,8 +205,6 @@ void ServerClientClass::rec_threadRun() {
         countBytes = recvfrom(client_mess_socket, arbeits_paket_recv, mess_paket_size - HEADER_SIZES, 0, (struct sockaddr *) &clientAddr, &clientAddrSize);
 
         clock_gettime(CLOCK_REALTIME, &(arbeits_paket_header_recv->recv_time));
-
-        arbeits_paket_header_recv->last_paket_recv_bytes = countBytes;
 
         if (set_timeout == 0) {
             set_timeout = 1;
@@ -318,7 +320,7 @@ void ServerClientClass::rec_threadRun() {
                 )
                 ) {
 
-            arbeits_paket_header_send->last_paket_recv_bytes = countBytes;
+            arbeits_paket_header_send->last_recv_paket_bytes = countBytes;
 
             arbeits_paket_header_send->count_pakets_in_train = arbeits_paket_header_recv->recv_data_rate / mess_paket_size_doppelt;
 
@@ -357,12 +359,12 @@ void ServerClientClass::rec_threadRun() {
                 my_bytes_per_sek = mess_paket_size * 6;
             }
 
-            /*
-                        // Datenrate bremsen :-)
-                        if (100000 < my_bytes_per_sek) {
-                            my_bytes_per_sek = 100000;
-                        }
-             */
+            // Datenrate bremsen :-)
+            if (bremsen) {
+                if (10000000 < (my_bytes_per_sek * 8)) {
+                    my_bytes_per_sek = 10000000 / 8;
+                }
+            }
 
             arbeits_paket_header_send->recv_data_rate = my_bytes_per_sek;
 
@@ -404,7 +406,7 @@ void ServerClientClass::rec_threadRun() {
 
             if (0 < lac_recv->count_paket_headers) {
                 arbeits_paket_header_send->last_recv_train_id = lac_recv->last_paket_header->train_id;
-                arbeits_paket_header_send->last_recv_train_send_countid = lac_recv->last_paket_header->retransfer_train_id;
+                arbeits_paket_header_send->last_recv_retransfer_train_id = lac_recv->last_paket_header->retransfer_train_id;
                 arbeits_paket_header_send->last_recv_paket_id = lac_recv->last_paket_header->paket_id;
             }
 
@@ -414,6 +416,23 @@ void ServerClientClass::rec_threadRun() {
             printf("  sende  %d Pakete # train_id: %d # send_countid: %d                                       ### ", arbeits_paket_header_send->count_pakets_in_train, arbeits_paket_header_send->train_id, arbeits_paket_header_send->retransfer_train_id);
             printf("\033[%d;0H", log_zeile + 8);
             fflush(stdout);
+
+            // rrt in ersten recv Packet eintraken
+            {
+                struct paket_header *x = NULL;
+                if (0 < lac_recv->count_paket_headers) {
+                    x = lac_send2->give_paket_header(lac_recv->first_paket_header->last_recv_train_id, lac_recv->first_paket_header->last_recv_retransfer_train_id, lac_recv->first_paket_header->last_recv_paket_id);
+                    if (x == NULL) {
+                        x = lac_send1->give_paket_header(lac_recv->first_paket_header->last_recv_train_id, lac_recv->first_paket_header->last_recv_retransfer_train_id, lac_recv->first_paket_header->last_recv_paket_id);
+                    }
+                }
+
+                if (x != NULL) {
+                    arbeits_paket_header_send->rrt = timespec_diff_double(&x->send_time, &lac_recv->first_paket_header->recv_time);
+                } else {
+                    arbeits_paket_header_send->rrt = -1;
+                }
+            }
 
             timespec train_sending_time;
             timespec *first_paket_train_send_time;
@@ -446,34 +465,35 @@ void ServerClientClass::rec_threadRun() {
                         }
                     } else if (1 < i) {
 
-                        /*                        
-                                                // Paket max. doppelt so schnell senden, wie vom Empfänger der Recv gewünscht
-                                                // sonst sleep
-                                                count_all_bytes_send = i * mess_paket_size;
-                                                time_diff_send = (double) train_sending_time.tv_nsec / 1000000000.0;
-                                                bytes_per_sek_send = count_all_bytes_send / time_diff_send;
 
-                                                double max_send_faktor = 1.175;
-                                                //double max_send_faktor = 1.0;
+                        if (bremsen) {
+                            // Paket max. doppelt so schnell senden, wie vom Empfänger der Recv gewünscht
+                            // sonst sleep
+                            count_all_bytes_send = i * mess_paket_size;
+                            time_diff_send = (double) train_sending_time.tv_nsec / 1000000000.0;
+                            bytes_per_sek_send = count_all_bytes_send / time_diff_send;
 
-                                                if ((max_send_faktor * arbeits_paket_header_recv->recv_data_rate) < bytes_per_sek_send) {
-                                                    double soll_send_time = count_all_bytes_send / (max_send_faktor * arbeits_paket_header_recv->recv_data_rate);
+                            double max_send_faktor = 1.175;
+                            //double max_send_faktor = 1.0;
 
-                                                    double sleep_time = soll_send_time - time_diff_send;
+                            if ((max_send_faktor * arbeits_paket_header_recv->recv_data_rate) < bytes_per_sek_send) {
+                                double soll_send_time = count_all_bytes_send / (max_send_faktor * arbeits_paket_header_recv->recv_data_rate);
 
-                                                    int sleep_time_microsec = 1000000 * sleep_time;
+                                double sleep_time = soll_send_time - time_diff_send;
 
-                                                    if (sleep_time_microsec < 0 || 1000000 < sleep_time_microsec) {
-                                                        sleep_time_microsec++;
-                                                        sleep_time_microsec--;
-                                                    } else {
-                        //                                usleep(sleep_time_microsec);
-                                                    }
+                                int sleep_time_microsec = 1000000 * sleep_time;
 
-                                                    send_sleep_total = send_sleep_total + sleep_time_microsec;
-                                                    send_sleep_count++;
-                                                }
-                         */
+                                if (sleep_time_microsec < 0 || 1000000 < sleep_time_microsec) {
+                                    sleep_time_microsec++;
+                                    sleep_time_microsec--;
+                                } else {
+                                    usleep(sleep_time_microsec);
+                                }
+
+                                send_sleep_total = send_sleep_total + sleep_time_microsec;
+                                send_sleep_count++;
+                            }
+                        }
                     }
                 }
             }
@@ -532,12 +552,22 @@ void ServerClientClass::rec_threadRun() {
                 struct paket_header *x;
 
                 if (lac_send1 == lac_send3) {
-                    x = lac_send2->give_paket_header(lac_recv->first_paket_header->last_recv_train_id, lac_recv->first_paket_header->last_recv_train_send_countid, lac_recv->first_paket_header->last_recv_paket_id);
+                    x = lac_send2->give_paket_header(lac_recv->first_paket_header->last_recv_train_id, lac_recv->first_paket_header->last_recv_retransfer_train_id, lac_recv->first_paket_header->last_recv_paket_id);
+
+                    if (x == NULL) {
+                        x = lac_send1->give_paket_header(lac_recv->first_paket_header->last_recv_train_id, lac_recv->first_paket_header->last_recv_retransfer_train_id, lac_recv->first_paket_header->last_recv_paket_id);
+                    }
+
                     lac_send2->save_to_file_and_clear();
                     //lac_send2->clear();
                     lac_send3 = lac_send2;
                 } else {
-                    x = lac_send1->give_paket_header(lac_recv->first_paket_header->last_recv_train_id, lac_recv->first_paket_header->last_recv_train_send_countid, lac_recv->first_paket_header->last_recv_paket_id);
+                    x = lac_send1->give_paket_header(lac_recv->first_paket_header->last_recv_train_id, lac_recv->first_paket_header->last_recv_retransfer_train_id, lac_recv->first_paket_header->last_recv_paket_id);
+
+                    if (x == NULL) {
+                        x = lac_send2->give_paket_header(lac_recv->first_paket_header->last_recv_train_id, lac_recv->first_paket_header->last_recv_retransfer_train_id, lac_recv->first_paket_header->last_recv_paket_id);
+                    }
+
                     lac_send1->save_to_file_and_clear();
                     //lac_send1->clear();
                     lac_send3 = lac_send1;

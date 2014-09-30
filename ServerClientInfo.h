@@ -1,16 +1,9 @@
-/* 
- * File:   ServerClientInfo.h
- * Author: user
- *
- * Created on 19. August 2014, 10:40
- */
-
 
 /*
  * eth0: 192.168.120.233
  * eth1: 192.168.220.235
  * 
-
+ 
 iptables -t nat -A POSTROUTING -o eth1 -d 192.168.220.236 -s 192.168.220.235 -j SNAT --to-source 192.168.120.234
 
 iptables -t nat -A PREROUTING -i eth0 -s 192.168.120.234 -d 192.168.220.236 -j DNAT --to-destination 192.168.120.233
@@ -36,7 +29,7 @@ iptables -t mangle -F POSTROUTING
 arp Tabelle anzeigen
 sudo arp
 
-arp eintrag löschen
+arp eintrag loeschen
 sudo arp -d [IP]
 
 arp Eintrag hinzufuegen
@@ -62,8 +55,16 @@ sudo iptraf
 
 #include <time.h>
 
-//#define SERVER_IP "192.168.120.233"
-#define SERVER_IP ""
+#define CLIENT_IP "" 
+#define SERVER_IP "134.99.147.228" // IP von strongrom.norgoe.de
+//#define SERVER_IP "127.0.0.1"
+
+//#define CLIENT_IP "192.168.220.235"
+//#define SERVER_IP "192.168.220.236"
+
+//#define CLIENT_IP "192.168.2.227" // eth0
+//#define CLIENT_IP "192.168.2.205" // eth1
+
 
 /*
  * max. UMTS Datenrate: HSPA+ 42 MBits/Sek
@@ -87,7 +88,6 @@ sudo iptraf
  */
 #define HEADER_SIZES 54
 
-
 struct init_info_client_to_server {
     int paket_size;
     char zeit_dateiname[16];
@@ -102,18 +102,21 @@ struct paket_header {
     int train_id;
     int retransfer_train_id;
     int paket_id;
+    
     int count_pakets_in_train;
+    
     int recv_data_rate; // Bytes per Sek
 
     int last_recv_train_id;
-    int last_recv_train_send_countid;
+    int last_recv_retransfer_train_id;
     int last_recv_paket_id;
+    int last_recv_paket_bytes;
     
-    int last_paket_recv_bytes;
-
     int timeout_time_tv_sec;
     int timeout_time_tv_usec;
-    
+
+    double rrt;
+
     struct timespec recv_time;
     struct timespec send_time;
 };
