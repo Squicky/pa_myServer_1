@@ -26,19 +26,22 @@ public:
 
     bool log_files_ok;
     bool in_while_schleife;
+    bool stop;
+    timespec end_time;
+    struct sockaddr_in otherAddr;
+
 private:
-    struct sockaddr_in clientAddr;
     struct sockaddr_in meineAddr;
-    socklen_t clientAddrSize;
-    int client_mess_socket;
+    socklen_t otherAddrSize;
+    int other_mess_socket;
+
+    int server_rec_port;
 
     pthread_t rec_thread;
     static void * rec_threadStart(void * vdata);
     void rec_threadRun();
 
     int mess_paket_size;
-
-    bool stop;
 
     char zeit_dateiname[255];
 };

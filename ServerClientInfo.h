@@ -57,7 +57,7 @@ sudo iptraf
 
 #define CLIENT_IP "" 
 //#define SERVER_IP "134.99.147.228" // IP von strongrom.norgoe.de
-#define SERVER_IP "127.0.0.1"
+#define SERVER_IP ""
 
 //#define CLIENT_IP "192.168.220.235"
 //#define SERVER_IP "192.168.220.236"
@@ -96,6 +96,7 @@ struct init_info_client_to_server {
 struct init_info_server_to_client {
     int port;
     bool log_files_ok;
+    bool client_ip_ok;
 };
 
 struct paket_header {
@@ -106,12 +107,14 @@ struct paket_header {
     int count_pakets_in_train;
     
     int recv_data_rate; // Bytes per Sek
+    int mess_paket_size; //
 
     int last_recv_train_id;
     int last_recv_retransfer_train_id;
     int last_recv_paket_id;
     int last_recv_paket_bytes;
     
+
     int timeout_time_tv_sec;
     int timeout_time_tv_usec;
 
