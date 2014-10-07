@@ -17,7 +17,7 @@
 #include <unistd.h>
 
 #define BinServer true
-#define LOG_TYPE 2
+#define LOG_TYPE 1
 
 ServerClientClass::ServerClientClass(int _paket_size, char _zeit_dateiname[]) {
 
@@ -236,7 +236,7 @@ void ServerClientClass::rec_threadRun() {
     arbeits_paket_header_recv->mess_paket_size = mess_paket_size;
 
     bool bremsen_datarate = true;
-    bool bremsen_send = true;
+    bool bremsen_send = false;
 
     timespec *first_paket_train_send_time;
     timespec *last_paket_train_send_time;
@@ -306,7 +306,7 @@ void ServerClientClass::rec_threadRun() {
             }
             if (1 < i) {
 
-                if (bremsen_datarate) {
+                if (bremsen_send) {
                     // Paket max. fak-mal so schnell senden, wie vom Empfaenger der Recv gewuenscht
                     // sonst sleep
                     count_all_bytes_send = i * mess_paket_size;
@@ -547,8 +547,9 @@ void ServerClientClass::rec_threadRun() {
 
             // Datenrate bremsen :-)
             if (bremsen_datarate) {
-                if (10000000 < (my_bytes_per_sek * 8)) {
-                    my_bytes_per_sek = 10000000 / 8;
+                int limit_bitps = 20000000 / 8;
+                if (limit_bitps < my_bytes_per_sek) {
+                    my_bytes_per_sek = limit_bitps;
                 }
             }
 
@@ -603,9 +604,14 @@ void ServerClientClass::rec_threadRun() {
             my_last_send_train_id = arbeits_paket_header_send->train_id;
 
             if (0 < lac_recv->count_paket_headers) {
-                arbeits_paket_header_send->last_recv_train_id = lac_recv->last_paket_header->train_id;
-                arbeits_paket_header_send->last_recv_retransfer_train_id = lac_recv->last_paket_header->retransfer_train_id;
-                arbeits_paket_header_send->last_recv_paket_id = lac_recv->last_paket_header->paket_id;
+                arbeits_paket_header_send->first_recv_train_id = lac_recv->first_paket_header->train_id;
+                arbeits_paket_header_send->first_recv_retransfer_train_id = lac_recv->first_paket_header->retransfer_train_id;
+                arbeits_paket_header_send->first_recv_paket_id = lac_recv->first_paket_header->paket_id;
+                arbeits_paket_header_send->first_recv_recv_time = lac_recv->first_paket_header->recv_time;
+            } else {
+                arbeits_paket_header_send->first_recv_train_id = -1;
+                arbeits_paket_header_send->first_recv_retransfer_train_id = -1;
+                arbeits_paket_header_send->first_recv_paket_id = -1;
             }
 
             if (log_type == 1) {
@@ -630,14 +636,15 @@ void ServerClientClass::rec_threadRun() {
             {
                 struct paket_header *x = NULL;
                 if (0 < lac_recv->count_paket_headers) {
-                    x = lac_send2->give_paket_header(lac_recv->first_paket_header->last_recv_train_id, lac_recv->first_paket_header->last_recv_retransfer_train_id, lac_recv->first_paket_header->last_recv_paket_id);
+                    x = lac_send2->give_paket_header(lac_recv->first_paket_header->first_recv_train_id, lac_recv->first_paket_header->first_recv_retransfer_train_id, lac_recv->first_paket_header->first_recv_paket_id);
                     if (x == NULL) {
-                        x = lac_send1->give_paket_header(lac_recv->first_paket_header->last_recv_train_id, lac_recv->first_paket_header->last_recv_retransfer_train_id, lac_recv->first_paket_header->last_recv_paket_id);
+                        x = lac_send1->give_paket_header(lac_recv->first_paket_header->first_recv_train_id, lac_recv->first_paket_header->first_recv_retransfer_train_id, lac_recv->first_paket_header->first_recv_paket_id);
                     }
                 }
 
                 if (x != NULL) {
                     arbeits_paket_header_send->rtt = timespec_diff_double(&x->send_time, &lac_recv->first_paket_header->recv_time);
+                    arbeits_paket_header_send->rtt = arbeits_paket_header_send->rtt - timespec_diff_double(&lac_recv->first_paket_header->first_recv_recv_time, &lac_recv->first_paket_header->send_time);
                 } else {
                     arbeits_paket_header_send->rtt = -1;
                 }
@@ -776,20 +783,20 @@ void ServerClientClass::rec_threadRun() {
                 struct paket_header *x;
 
                 if (lac_send1 == lac_send3) {
-                    x = lac_send2->give_paket_header(lac_recv->first_paket_header->last_recv_train_id, lac_recv->first_paket_header->last_recv_retransfer_train_id, lac_recv->first_paket_header->last_recv_paket_id);
+                    x = lac_send2->give_paket_header(lac_recv->first_paket_header->first_recv_train_id, lac_recv->first_paket_header->first_recv_retransfer_train_id, lac_recv->first_paket_header->first_recv_paket_id);
 
                     if (x == NULL) {
-                        x = lac_send1->give_paket_header(lac_recv->first_paket_header->last_recv_train_id, lac_recv->first_paket_header->last_recv_retransfer_train_id, lac_recv->first_paket_header->last_recv_paket_id);
+                        x = lac_send1->give_paket_header(lac_recv->first_paket_header->first_recv_train_id, lac_recv->first_paket_header->first_recv_retransfer_train_id, lac_recv->first_paket_header->first_recv_paket_id);
                     }
 
                     lac_send2->save_to_file_and_clear();
                     //lac_send2->clear();
                     lac_send3 = lac_send2;
                 } else {
-                    x = lac_send1->give_paket_header(lac_recv->first_paket_header->last_recv_train_id, lac_recv->first_paket_header->last_recv_retransfer_train_id, lac_recv->first_paket_header->last_recv_paket_id);
+                    x = lac_send1->give_paket_header(lac_recv->first_paket_header->first_recv_train_id, lac_recv->first_paket_header->first_recv_retransfer_train_id, lac_recv->first_paket_header->first_recv_paket_id);
 
                     if (x == NULL) {
-                        x = lac_send2->give_paket_header(lac_recv->first_paket_header->last_recv_train_id, lac_recv->first_paket_header->last_recv_retransfer_train_id, lac_recv->first_paket_header->last_recv_paket_id);
+                        x = lac_send2->give_paket_header(lac_recv->first_paket_header->first_recv_train_id, lac_recv->first_paket_header->first_recv_retransfer_train_id, lac_recv->first_paket_header->first_recv_paket_id);
                     }
 
                     lac_send1->save_to_file_and_clear();
