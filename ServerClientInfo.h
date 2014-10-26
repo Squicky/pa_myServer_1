@@ -118,6 +118,7 @@ struct paket_header {
 
     int timeout_time_tv_sec;
     int timeout_time_tv_usec;
+    bool recv_blocked;
 
     double rtt;
 
