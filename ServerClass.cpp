@@ -17,6 +17,7 @@
 #include <list>
 #include <unistd.h>
 #include <time.h>
+#include <unistd.h>
 
 ServerClass::ServerClass() {
     /*
@@ -64,10 +65,14 @@ void ServerClass::threadRun() {
     meineAddr.sin_family = AF_INET;
     meineAddr.sin_port = htons(LOCAL_Control_SERVER_PORT);
 
-    //    meineAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    if (6 < strlen(SERVER_IP) && strlen(SERVER_IP) < 16) {
-        meineAddr.sin_addr.s_addr = inet_addr(SERVER_IP);
-    } else {
+    char SERVER_IP_strongrom[] = "134.99.147.228";
+    char hostname[1024];
+    hostname[1023] = '\0';
+    gethostname(hostname, 1023);
+    if (0 == strcmp(hostname, "strongrom")) {
+        meineAddr.sin_addr.s_addr = inet_addr(SERVER_IP_strongrom);
+    }
+    else {
         meineAddr.sin_addr.s_addr = htonl(INADDR_ANY);
     }
 

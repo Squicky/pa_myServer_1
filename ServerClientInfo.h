@@ -57,7 +57,7 @@ sudo iptraf
 
 #define CLIENT_IP "" 
 //#define SERVER_IP "134.99.147.228" // IP von strongrom.norgoe.de
-#define SERVER_IP ""
+//#define SERVER_IP ""
 
 //#define CLIENT_IP "192.168.220.235"
 //#define SERVER_IP "192.168.220.236"
